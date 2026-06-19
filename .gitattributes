@@ -1,0 +1,3 @@
+# Scripts shell sempre LF (rodam em Linux dentro do container)
+*.sh text eol=lf
+Dockerfile text eol=lf

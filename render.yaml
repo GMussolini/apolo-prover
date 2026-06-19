@@ -1,15 +1,21 @@
-# Render Blueprint - APOLO Prover (somente a API; frontend vai no Vercel)
+# Render Blueprint - APOLO Prover
+#
+# Arquitetura simplificada:
+#  - API + Postgres LOCAL no mesmo container (efemero - some quando o pod reinicia)
+#  - Frontend no Vercel
+#  - SQL Server da Prover acessado direto via internet (firewall liberado)
+#
+# Postgres local roda dentro do container via apps/api/boot.sh.
+# Conexao no config: postgresql://apolo@127.0.0.1:5432/apolo
 #
 # IMPORTANTE - antes do primeiro deploy:
 #   1) No painel Render, preencha APOLO_CONFIG_JSON com o JSON completo da config
 #      (mesmo formato do config.example.json). Inclua chaves API NOVAS (as
-#      antigas precisam ser revogadas) e a senha do SQL Server (tambem rotacionada).
-#   2) Libere o firewall do Azure SQL para 0.0.0.0/0 TEMPORARIAMENTE (POC).
-#      Ideal: dropar Render starter e usar IPs estaticos.
-#   3) Postgres: crie um projeto gratis em https://neon.tech, copie a
-#      connection string e cole dentro do APOLO_CONFIG_JSON em "postgres_conn".
-#      Importante: usar sslmode=require na URL do Neon.
-#   4) "cors_origins" dentro do APOLO_CONFIG_JSON deve incluir a URL do Vercel
+#      antigas foram comprometidas e precisam ser revogadas) e a senha do
+#      SQL Server (tambem rotacionada).
+#   2) Libere o firewall do Azure SQL para 0.0.0.0/0 (POC). Em prod, troque por
+#      Render starter ($7/mes) que tem IPs estaticos e adicione na allowlist.
+#   3) cors_origins dentro do APOLO_CONFIG_JSON deve incluir a URL Vercel
 #      (ex.: ["https://apolo-prover.vercel.app","http://localhost:3000"]).
 
 services:
@@ -25,11 +31,8 @@ services:
     healthCheckPath: /health
     envVars:
       # Config completa em UMA env var (JSON cru). O backend ja sabe ler
-      # APOLO_CONFIG_JSON (ver apps/api/app/core/config.py:get_config).
+      # APOLO_CONFIG_JSON (apps/api/app/core/config.py:get_config).
       - key: APOLO_CONFIG_JSON
-        sync: false
-      # Alternativa: mesmo JSON em base64. Use UM ou OUTRO, nao os dois.
-      - key: APOLO_CONFIG_B64
         sync: false
       - key: PYTHONUNBUFFERED
         value: "1"

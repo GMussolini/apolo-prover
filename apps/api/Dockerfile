@@ -1,7 +1,10 @@
 FROM python:3.12-slim AS base
 
+# Postgres embutido (efemero, some quando o container reinicia) + ODBC SQL Server
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl gnupg unixodbc-dev g++ ca-certificates \
+    postgresql postgresql-contrib \
+    procps \
  && curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg \
  && echo "deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/debian/12/prod bookworm main" > /etc/apt/sources.list.d/mssql-release.list \
  && apt-get update \
@@ -29,5 +32,8 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 FROM base AS prod
 COPY --from=test /app/app /app/app
+COPY boot.sh /boot.sh
+RUN chmod +x /boot.sh
 EXPOSE 8000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+# boot.sh inicia o Postgres local efemero antes do uvicorn.
+CMD ["/boot.sh"]

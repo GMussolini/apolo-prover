@@ -15,7 +15,7 @@
 
   "crm_conn": "Driver={ODBC Driver 18 for SQL Server};Server=tcp:<HOST>,1433;Database=<DB_CRM>;Uid=<USER>;Pwd=<SENHA>;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30",
   "cr_conn":  "Driver={ODBC Driver 18 for SQL Server};Server=tcp:<HOST>,1433;Database=<DB_CR>;Uid=<USER>;Pwd=<SENHA>;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30",
-  "postgres_conn": "postgresql://<USER>:<SENHA>@<HOST>:5432/<DB>?sslmode=require",
+  "postgres_conn": "postgresql://apolo@127.0.0.1:5432/apolo",
 
   "cors_origins": ["http://localhost:3000", "https://apolo-prover.vercel.app"],
 
