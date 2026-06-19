@@ -1,0 +1,46 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: StatusPreLeads
+base: crm
+linhas_aprox: 7
+tamanho_mb: 0.07
+chave_primaria: [Id]
+usado_por_dominios: [CRM_PIPELINE]
+descricao: "Tabela de domínio (lookup) com os status do funil de prospecção de um PreLead (ex.: 'Em prospecção'). Referenciada por PreLeads.StatusPreLeadId; é o que define em que etapa do funil o lead está antes de virar Client."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Chave primária do status; alvo de PreLeads.StatusPreLeadId."
+  - nome: Descricao
+    tipo: nvarchar
+    nulo: false
+    descricao: "Texto legível do status (ex.: 'Em prospecção'). É ESTE campo que aparece nas respostas/filtros — não há coluna 'Nome'."
+  - nome: Ativo
+    tipo: bit
+    nulo: false
+    descricao: "Indica se o status está ativo/disponível para uso (1) ou desativado (0)."
+  - nome: NrDias
+    tipo: int
+    nulo: false
+    descricao: "Número de dias esperado/limite de permanência do lead neste status (SLA do funil)."
+  - nome: NrOrdem
+    tipo: int
+    nulo: false
+    descricao: "Ordem de exibição do status no funil (sequência das etapas)."
+
+relacionamentos:
+  []
+
+gotchas:
+  - "O texto do status fica em Descricao, NÃO em 'Nome' (essa coluna não existe). Filtre por s.Descricao = 'Em prospecção'."
+  - "É lookup de PreLeads (lead), não de Clients. Cliente já convertido não tem status de prelead — para clientes use FaseVendas/MotivoConclusaoVendas."
+  - "Para ordenar etapas do funil use NrOrdem, não a ordem alfabética de Descricao."
+
+queries_exemplo:
+  - pergunta: "Quais são os status de prelead disponíveis, na ordem do funil?"
+    sql: "SELECT Descricao, NrOrdem FROM StatusPreLeads WHERE Ativo = 1 ORDER BY NrOrdem"
+  - pergunta: "Quantos leads existem em cada status?"
+    sql: "SELECT s.Descricao AS status, COUNT(*) AS total FROM PreLeads p LEFT JOIN StatusPreLeads s ON s.Id = p.StatusPreLeadId GROUP BY s.Descricao ORDER BY total DESC"

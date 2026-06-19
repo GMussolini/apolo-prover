@@ -1,0 +1,811 @@
+﻿Schema	Tabela	Coluna	Tipo	MaxLen	Null	Ident	PK	FKTo
+dbo	AcompanhamentoColaboradorRH	Id	uniqueidentifier	16	False	False	1	
+dbo	AcompanhamentoColaboradorRH	DtAcompanhamento	datetime	8	False	False	0	
+dbo	AcompanhamentoColaboradorRH	Descricao	nvarchar	-1	False	False	0	
+dbo	AcompanhamentoColaboradorRH	IcAlerta	bit	1	False	False	0	
+dbo	AcompanhamentoColaboradorRH	Acao	nvarchar	510	True	False	0	
+dbo	AcompanhamentoColaboradorRH	ColaboradorId	uniqueidentifier	16	False	False	0	dbo.Colaboradores
+dbo	Agenda	Id	uniqueidentifier	16	False	False	1	
+dbo	Agenda	UsuarioId	nvarchar	900	False	False	0	dbo.AspNetUsers
+dbo	Agenda	HorarioInicio	time	5	False	False	0	
+dbo	Agenda	HorarioFim	time	5	False	False	0	
+dbo	Agenda	Cliente	nvarchar	510	False	False	0	
+dbo	Agenda	Tipo	int	4	False	False	0	
+dbo	Agenda	DiaSemana	int	4	True	False	0	
+dbo	Agenda	Observacao	nvarchar	-1	True	False	0	
+dbo	AnexoTicket	Id	uniqueidentifier	16	False	False	1	
+dbo	AnexoTicket	TicketId	uniqueidentifier	16	False	False	0	dbo.Ticket
+dbo	AnexoTicket	DataUpload	datetime	8	False	False	0	
+dbo	AnexoTicket	EmailUpload	nvarchar	510	False	False	0	
+dbo	AnexoTicket	CaminhoArquivo	nvarchar	-1	False	False	0	
+dbo	AnexoTicket	DataCriacao	datetime	8	True	False	0	
+dbo	AnexoTicket	DataAtualizacao	datetime	8	True	False	0	
+dbo	Area	Id	uniqueidentifier	16	False	False	1	
+dbo	Area	Nome	nvarchar	510	False	False	0	
+dbo	Area	EmailResponsavel	nvarchar	510	False	False	0	
+dbo	Area	Ativo	bit	1	False	False	0	
+dbo	Area	DataCriacao	datetime2	8	True	False	0	
+dbo	Area	DataAtualizacao	datetime2	8	True	False	0	
+dbo	AspNetRoleClaims	Id	int	4	False	True	1	
+dbo	AspNetRoleClaims	RoleId	nvarchar	900	False	False	0	dbo.AspNetRoles
+dbo	AspNetRoleClaims	ClaimType	nvarchar	-1	True	False	0	
+dbo	AspNetRoleClaims	ClaimValue	nvarchar	-1	True	False	0	
+dbo	AspNetRoles	Id	nvarchar	900	False	False	1	
+dbo	AspNetRoles	Name	nvarchar	512	True	False	0	
+dbo	AspNetRoles	NormalizedName	nvarchar	512	True	False	0	
+dbo	AspNetRoles	ConcurrencyStamp	nvarchar	-1	True	False	0	
+dbo	AspNetUserClaims	Id	int	4	False	True	1	
+dbo	AspNetUserClaims	UserId	nvarchar	900	False	False	0	dbo.AspNetUsers
+dbo	AspNetUserClaims	ClaimType	nvarchar	-1	True	False	0	
+dbo	AspNetUserClaims	ClaimValue	nvarchar	-1	True	False	0	
+dbo	AspNetUserLogins	LoginProvider	nvarchar	256	False	False	1	
+dbo	AspNetUserLogins	ProviderKey	nvarchar	256	False	False	1	
+dbo	AspNetUserLogins	ProviderDisplayName	nvarchar	-1	True	False	0	
+dbo	AspNetUserLogins	UserId	nvarchar	900	False	False	0	dbo.AspNetUsers
+dbo	AspNetUserRoles	UserId	nvarchar	900	False	False	1	dbo.AspNetUsers
+dbo	AspNetUserRoles	RoleId	nvarchar	900	False	False	1	dbo.AspNetRoles
+dbo	AspNetUsers	Id	nvarchar	900	False	False	1	
+dbo	AspNetUsers	UserName	nvarchar	512	True	False	0	
+dbo	AspNetUsers	NormalizedUserName	nvarchar	512	True	False	0	
+dbo	AspNetUsers	Email	nvarchar	512	True	False	0	
+dbo	AspNetUsers	NormalizedEmail	nvarchar	512	True	False	0	
+dbo	AspNetUsers	EmailConfirmed	bit	1	False	False	0	
+dbo	AspNetUsers	PasswordHash	nvarchar	-1	True	False	0	
+dbo	AspNetUsers	SecurityStamp	nvarchar	-1	True	False	0	
+dbo	AspNetUsers	ConcurrencyStamp	nvarchar	-1	True	False	0	
+dbo	AspNetUsers	PhoneNumber	nvarchar	-1	True	False	0	
+dbo	AspNetUsers	PhoneNumberConfirmed	bit	1	False	False	0	
+dbo	AspNetUsers	TwoFactorEnabled	bit	1	False	False	0	
+dbo	AspNetUsers	LockoutEnd	datetimeoffset	10	True	False	0	
+dbo	AspNetUsers	LockoutEnabled	bit	1	False	False	0	
+dbo	AspNetUsers	AccessFailedCount	int	4	False	False	0	
+dbo	AspNetUserTokens	UserId	nvarchar	900	False	False	1	dbo.AspNetUsers
+dbo	AspNetUserTokens	LoginProvider	nvarchar	256	False	False	1	
+dbo	AspNetUserTokens	Name	nvarchar	256	False	False	1	
+dbo	AspNetUserTokens	Value	nvarchar	-1	True	False	0	
+dbo	AvaliacaoColaboradores	Id	uniqueidentifier	16	False	False	1	
+dbo	AvaliacaoColaboradores	ColaboradorId	uniqueidentifier	16	True	False	0	dbo.Colaboradores
+dbo	AvaliacaoColaboradores	ClienteId	uniqueidentifier	16	True	False	0	dbo.Empresas
+dbo	AvaliacaoColaboradores	ContratoId	uniqueidentifier	16	True	False	0	dbo.Contratos
+dbo	AvaliacaoColaboradores	ResponsavelTecnico	nvarchar	510	True	False	0	
+dbo	AvaliacaoColaboradores	Periodo	datetime2	8	False	False	0	
+dbo	AvaliacaoColaboradores	Tecnico	int	4	True	False	0	
+dbo	AvaliacaoColaboradores	Comunicacao	int	4	True	False	0	
+dbo	AvaliacaoColaboradores	Comprometimento	int	4	True	False	0	
+dbo	AvaliacaoColaboradores	Descricao	nvarchar	-1	True	False	0	
+dbo	Bancoss	Id	uniqueidentifier	16	False	False	1	
+dbo	Bancoss	NrBanco	int	4	False	False	0	
+dbo	Bancoss	Descricao	nvarchar	-1	False	False	0	
+dbo	Bancoss	Ativo	bit	1	False	False	0	
+dbo	CandidatoCurriculoChunk	Id	uniqueidentifier	16	False	False	1	
+dbo	CandidatoCurriculoChunk	CandidatoId	uniqueidentifier	16	False	False	0	
+dbo	CandidatoCurriculoChunk	ChunkIndex	int	4	False	False	0	
+dbo	CandidatoCurriculoChunk	TextoChunk	nvarchar	-1	False	False	0	
+dbo	CandidatoCurriculoChunk	Embedding	vector	6152	False	False	0	
+dbo	CandidatoCurriculoChunk	BlobPath	nvarchar	800	True	False	0	
+dbo	CandidatoCurriculoChunk	DataCriacao	datetime2	8	False	False	0	
+dbo	CandidatoCurriculoChunk	Secao	int	4	True	False	0	
+dbo	CandidatoCurriculoChunk	TituloSecao	nvarchar	300	True	False	0	
+dbo	CandidatoCurriculoChunk	TextoEnriquecido	nvarchar	-1	True	False	0	
+dbo	CandidatoCurriculoChunk	TextoNormalizado	nvarchar	-1	True	False	0	
+dbo	CandidatoCurriculoChunk	Empresa	nvarchar	400	True	False	0	
+dbo	CandidatoCurriculoChunk	Cargo	nvarchar	400	True	False	0	
+dbo	CandidatoCurriculoChunk	Periodo	nvarchar	200	True	False	0	
+dbo	CandidatoCurriculoChunk	SenioridadeId	uniqueidentifier	16	True	False	0	dbo.Senioridades
+dbo	CandidatoCurriculoChunk	Localizacao	nvarchar	400	True	False	0	
+dbo	CandidatoCurriculoChunk	PalavrasChaveJson	nvarchar	-1	True	False	0	
+dbo	CandidatoCurriculoChunk	IdiomasJson	nvarchar	-1	True	False	0	
+dbo	CandidatoCurriculoChunk	DataAtualizacao	datetime2	8	True	False	0	
+dbo	CandidatoIdioma	Id	uniqueidentifier	16	False	False	1	
+dbo	CandidatoIdioma	CandidatoId	uniqueidentifier	16	False	False	0	
+dbo	CandidatoIdioma	Idioma	nvarchar	200	False	False	0	
+dbo	CandidatoIdioma	Nivel	nvarchar	200	True	False	0	
+dbo	CandidatoIdioma	Origem	nvarchar	100	True	False	0	
+dbo	CandidatoIdioma	DataCriacao	datetime2	8	False	False	0	
+dbo	Candidatos	Id	uniqueidentifier	16	False	False	1	
+dbo	Candidatos	NomeCompleto	nvarchar	-1	False	False	0	
+dbo	Candidatos	Email	nvarchar	-1	False	False	0	
+dbo	Candidatos	Documento	nvarchar	-1	True	False	0	
+dbo	Candidatos	Telefone	nvarchar	-1	False	False	0	
+dbo	Candidatos	Genero	nvarchar	-1	True	False	0	
+dbo	Candidatos	D_Nascimento	datetime2	8	True	False	0	
+dbo	Candidatos	Descricao	nvarchar	-1	True	False	0	
+dbo	Candidatos	EscolaridadeId	uniqueidentifier	16	True	False	0	dbo.Escolaridades
+dbo	Candidatos	CEP	nvarchar	-1	True	False	0	
+dbo	Candidatos	Rua	nvarchar	-1	True	False	0	
+dbo	Candidatos	Cidade	nvarchar	-1	True	False	0	
+dbo	Candidatos	Bairro	nvarchar	-1	True	False	0	
+dbo	Candidatos	Numero	int	4	True	False	0	
+dbo	Candidatos	Uf	nvarchar	-1	True	False	0	
+dbo	Candidatos	Complemento	nvarchar	2000	True	False	0	
+dbo	Candidatos	Viagem	bit	1	True	False	0	
+dbo	Candidatos	UserId	nvarchar	-1	True	False	0	
+dbo	Candidatos	Observacao	nvarchar	-1	True	False	0	
+dbo	Candidatos	ColaboradorId	uniqueidentifier	16	True	False	0	
+dbo	Candidatos	LinkReuniao	nvarchar	-1	True	False	0	
+dbo	Candidatos	DataHoraAdicao	datetime2	8	True	False	0	
+dbo	Candidatos	CriadoPor	uniqueidentifier	16	True	False	0	
+dbo	Candidatos	AceitaPresencial	bit	1	True	False	0	
+dbo	Candidatos	CaminhoArquivo	nvarchar	-1	True	False	0	
+dbo	Candidatos	DtCriacao	datetime2	8	True	False	0	
+dbo	Candidatos	PretensaoSalarial	money	8	True	False	0	
+dbo	Candidatos	Contrato	nvarchar	100	True	False	0	
+dbo	Candidatos	ObsTecnica	nvarchar	-1	True	False	0	
+dbo	Candidatos	IcAprovado	bit	1	True	False	0	
+dbo	Candidatos	DadosIA	nvarchar	-1	True	False	0	
+dbo	Candidatos	TextoCurriculo	nvarchar	-1	True	False	0	
+dbo	Candidatos	DadosIANormalizado	nvarchar	-1	True	False	0	
+dbo	CandidatosSkills	Id	uniqueidentifier	16	False	False	1	
+dbo	CandidatosSkills	CandidatoId	uniqueidentifier	16	True	False	0	dbo.Candidatos
+dbo	CandidatosSkills	SkillId	uniqueidentifier	16	True	False	0	dbo.Skills
+dbo	CandidatosSkills	SenioridadeId	uniqueidentifier	16	True	False	0	dbo.Senioridades
+dbo	CandidatosSkills	VagaId	uniqueidentifier	16	True	False	0	dbo.Vagas
+dbo	CandidatosSkills	UserId	nvarchar	-1	True	False	0	
+dbo	CandidatosSkills	DataHoraAdicao	datetime2	8	True	False	0	
+dbo	Cargos	Id	uniqueidentifier	16	False	False	1	
+dbo	Cargos	DepartamentoId	uniqueidentifier	16	False	False	0	dbo.Departamentos
+dbo	Cargos	Nome	varchar	255	False	False	0	
+dbo	Cargos	Ativo	bit	1	False	False	0	
+dbo	Cargos	IdEmpresaSistema	uniqueidentifier	16	True	False	0	dbo.EmpresasSistema
+dbo	Cargos	IdFilial	uniqueidentifier	16	True	False	0	dbo.Filiais
+dbo	Categorias	Id	uniqueidentifier	16	False	False	1	
+dbo	Categorias	Descricao	nvarchar	-1	False	False	0	
+dbo	Categorias	Ativo	bit	1	False	False	0	
+dbo	Categorias	GrupoId	uniqueidentifier	16	False	False	0	dbo.Grupos
+dbo	CategoriaSkills	Id	uniqueidentifier	16	False	False	1	
+dbo	CategoriaSkills	Nome	nvarchar	-1	False	False	0	
+dbo	CategoriaSkills	Ativo	bit	1	False	False	0	
+dbo	CentroCustos	Id	uniqueidentifier	16	False	False	1	
+dbo	CentroCustos	Nome	varchar	255	False	False	0	
+dbo	CentroCustos	Observacao	varchar	255	False	False	0	
+dbo	CentroCustos	Ativo	bit	1	False	False	0	
+dbo	CestasBasicas	Id	uniqueidentifier	16	False	False	1	
+dbo	CestasBasicas	Nome	nvarchar	-1	True	False	0	
+dbo	CestasBasicas	Ativo	bit	1	False	False	0	
+dbo	CestasBasicas	DataCadastro	datetime2	8	False	False	0	
+dbo	CestasBasicas	DataDeNascimento	datetime2	8	False	False	0	
+dbo	CestasBasicas	Telefone	nvarchar	-1	True	False	0	
+dbo	CestasBasicas	CEP	nvarchar	-1	True	False	0	
+dbo	CestasBasicas	UF	nvarchar	-1	True	False	0	
+dbo	CestasBasicas	Cidade	nvarchar	-1	True	False	0	
+dbo	CestasBasicas	Rua	nvarchar	-1	True	False	0	
+dbo	CestasBasicas	Numero	nvarchar	-1	True	False	0	
+dbo	CestasBasicas	Bairro	nvarchar	-1	True	False	0	
+dbo	CestasBasicas	Complemento	nvarchar	-1	True	False	0	
+dbo	CestasBasicas	Img	nvarchar	-1	True	False	0	
+dbo	CestasBasicas	Cpf	nvarchar	-1	True	False	0	
+dbo	Cidades	Id	uniqueidentifier	16	False	False	1	
+dbo	Cidades	Nome	varchar	50	False	False	0	
+dbo	Colaboradores	Id	uniqueidentifier	16	False	False	1	
+dbo	Colaboradores	NomeCompleto	varchar	255	False	False	0	
+dbo	Colaboradores	Email	varchar	255	False	False	0	
+dbo	Colaboradores	Documento	varchar	20	False	False	0	
+dbo	Colaboradores	Telefone	varchar	20	True	False	0	
+dbo	Colaboradores	Genero	varchar	20	False	False	0	
+dbo	Colaboradores	Ativo	bit	1	False	False	0	
+dbo	Colaboradores	ICvendedor	bit	1	False	False	0	
+dbo	Colaboradores	ICDeliveryManager	bit	1	False	False	0	
+dbo	Colaboradores	ICTechLead	bit	1	False	False	0	
+dbo	Colaboradores	D_Nascimento	datetime2	8	True	False	0	
+dbo	Colaboradores	Especializacao	varchar	60	True	False	0	
+dbo	Colaboradores	DataInicio	datetime2	8	True	False	0	
+dbo	Colaboradores	DataFim	datetime2	8	True	False	0	
+dbo	Colaboradores	Data_Criacao_Email	datetime2	8	True	False	0	
+dbo	Colaboradores	CargoId	uniqueidentifier	16	True	False	0	
+dbo	Colaboradores	Contrato	nvarchar	-1	True	False	0	
+dbo	Colaboradores	ColaboradorId	uniqueidentifier	16	True	False	0	
+dbo	Colaboradores	DtAvaliacaoInicial	datetime2	8	False	False	0	
+dbo	Colaboradores	EmailCliente	varchar	255	False	False	0	
+dbo	Colaboradores	NomeCliente	varchar	255	False	False	0	
+dbo	Colaboradores	Periodicidade	int	4	False	False	0	
+dbo	Colaboradores	CaminhoCurriculo	nvarchar	-1	True	False	0	
+dbo	Colaboradores	DtUltimaVenda	datetime	8	True	False	0	
+dbo	Colaboradores	TipoAlocacao	int	4	True	False	0	
+dbo	Colaboradores	MotivoDesligamentoId	uniqueidentifier	16	True	False	0	dbo.MotivoDesligamento
+dbo	Colaboradores	ObservacoesDesligamento	nvarchar	-1	True	False	0	
+dbo	Colaboradores	DataDesligamento	date	3	True	False	0	
+dbo	Colaboradores	IcGestao	bit	1	True	False	0	
+dbo	Colaboradores	IcEnviaEmailFinanceiro	bit	1	False	False	0	
+dbo	Colaboradores	ICContratoCorreto	bit	1	True	False	0	
+dbo	Colaboradores	ResponsavelTicket	char	1	False	False	0	
+dbo	Colaboradores	IcRecrutador	bit	1	False	False	0	
+dbo	ColaboradoresSkills	Id	uniqueidentifier	16	False	False	1	
+dbo	ColaboradoresSkills	ColaboradorId	uniqueidentifier	16	True	False	0	dbo.Colaboradores
+dbo	ColaboradoresSkills	SkillId	uniqueidentifier	16	True	False	0	dbo.Skills
+dbo	ColaboradoresSkills	SenioridadeId	uniqueidentifier	16	True	False	0	dbo.Senioridades
+dbo	ColaborarEmpresas	Id	uniqueidentifier	16	False	False	1	
+dbo	ColaborarEmpresas	ColaboradorId	uniqueidentifier	16	False	False	0	dbo.Colaboradores
+dbo	ColaborarEmpresas	EmpresaId	uniqueidentifier	16	False	False	0	dbo.Empresas
+dbo	Comunicados	Id	uniqueidentifier	16	False	False	1	
+dbo	Comunicados	Titulo	nvarchar	512	True	False	0	
+dbo	Comunicados	Descricao	nvarchar	1000	True	False	0	
+dbo	Comunicados	Corpo	nvarchar	-1	False	False	0	
+dbo	Comunicados	CaminhoImagem	nvarchar	600	True	False	0	
+dbo	Comunicados	DataPublicacao	datetime	8	False	False	0	
+dbo	Comunicados	Ativo	bit	1	False	False	0	
+dbo	Comunicados	CreatedBy	nvarchar	512	True	False	0	
+dbo	ConfigContas	Id	uniqueidentifier	16	False	False	1	
+dbo	ConfigContas	Descricao	nvarchar	-1	False	False	0	
+dbo	ConfigContas	Ativo	bit	1	False	False	0	
+dbo	ConfiguracaoNotificacao	Id	uniqueidentifier	16	False	False	1	
+dbo	ConfiguracaoNotificacao	NotificacaoTipo	nvarchar	510	False	False	0	
+dbo	ConfiguracaoNotificacao	UsuarioId	nvarchar	900	False	False	0	dbo.AspNetUsers
+dbo	ConfiguracaoNotificacao	NomeNotificacao	nvarchar	510	False	False	0	
+dbo	ContasAPagar	Id	uniqueidentifier	16	False	False	1	
+dbo	ContasAPagar	ColaboradorId	uniqueidentifier	16	True	False	0	dbo.Colaboradores
+dbo	ContasAPagar	EmpresaOrigem	nvarchar	-1	False	False	0	
+dbo	ContasAPagar	Periodo	datetime2	8	False	False	0	
+dbo	ContasAPagar	Pagamento	money	8	True	False	0	
+dbo	ContasAPagar	Status	nvarchar	-1	False	False	0	
+dbo	ContasAPagar	DataProcesso	datetime2	8	True	False	0	
+dbo	ContasAPagar	Observacao	nvarchar	-1	True	False	0	
+dbo	ContasAPagar	DtGeracaoFolha	datetime	8	True	False	0	
+dbo	ContasAPagar	NrAno	int	4	True	False	0	
+dbo	ContasAPagar	NrMes	int	4	True	False	0	
+dbo	ContasAPagar	TipoFolha	int	4	False	False	0	
+dbo	ContasAPagar	IcEmailEnviado	bit	1	False	False	0	
+dbo	ContasAPagar	DtEnvioEmail	datetime	8	True	False	0	
+dbo	ContasAPagar	CorpoEmail	nvarchar	-1	True	False	0	
+dbo	ContasAReceber	Id	uniqueidentifier	16	False	False	1	
+dbo	ContasAReceber	EmpresaId	uniqueidentifier	16	True	False	0	dbo.Empresas
+dbo	ContasAReceber	Periodo	datetime2	8	False	False	0	
+dbo	ContasAReceber	ValorNota	money	8	True	False	0	
+dbo	ContasAReceber	Status	nvarchar	-1	True	False	0	
+dbo	ContasAReceber	EmpresaOrigemId	uniqueidentifier	16	True	False	0	dbo.EmpresaOrigens
+dbo	ContasAReceber	ValorBoleto	money	8	True	False	0	
+dbo	ContasAReceber	DataPgBoleto	datetime2	8	True	False	0	
+dbo	ContasAReceber	DtGeracaoFolha	datetime	8	True	False	0	
+dbo	ContasAReceber	NrAno	int	4	True	False	0	
+dbo	ContasAReceber	NrMes	int	4	True	False	0	
+dbo	ContasAReceber	TipoFolha	int	4	False	False	0	
+dbo	ContasAReceber	Observacao	nvarchar	-1	True	False	0	
+dbo	ContasFinanceiros	Id	uniqueidentifier	16	False	False	1	
+dbo	ContasFinanceiros	Data	datetime2	8	False	False	0	
+dbo	ContasFinanceiros	Ativo	bit	1	False	False	0	
+dbo	ContasFinanceiros	ConfigContaId	uniqueidentifier	16	False	False	0	dbo.ConfigContas
+dbo	ContasFinanceiros	Valor	decimal	9	False	False	0	
+dbo	Contato	Id	uniqueidentifier	16	False	False	1	
+dbo	Contato	EmpresaId	uniqueidentifier	16	False	False	0	dbo.Empresas
+dbo	Contato	NomeContato	varchar	255	True	False	0	
+dbo	Contato	CargoContato	varchar	255	True	False	0	
+dbo	Contato	EmailContato	varchar	255	True	False	0	
+dbo	Contato	TelefoneContato	varchar	255	True	False	0	
+dbo	Contratos	Id	uniqueidentifier	16	False	False	1	
+dbo	Contratos	EmpresaId	uniqueidentifier	16	False	False	0	dbo.Empresas
+dbo	Contratos	Objeto	varchar	255	False	False	0	
+dbo	Contratos	Obs	nvarchar	-1	True	False	0	
+dbo	Contratos	Escopo	nvarchar	-1	True	False	0	
+dbo	Contratos	Valor	money	8	True	False	0	
+dbo	Contratos	ColaboradorId	uniqueidentifier	16	False	False	0	dbo.Colaboradores
+dbo	Contratos	ComissaoFixa	money	8	True	False	0	
+dbo	Contratos	ComissaoPercentual	money	8	True	False	0	
+dbo	Contratos	CentroCustoId	uniqueidentifier	16	True	False	0	dbo.CentroCustos
+dbo	Contratos	DataInicio	datetime2	8	False	False	0	
+dbo	Contratos	EmpresaOrigemId	uniqueidentifier	16	True	False	0	dbo.EmpresaOrigens
+dbo	Contratos	IsAtivo	bit	1	False	False	0	
+dbo	Contratos	DataEncerramento	datetime2	8	True	False	0	
+dbo	Contratos	Contratado	nvarchar	-1	True	False	0	
+dbo	Contratos	GestorId	uniqueidentifier	16	True	False	0	dbo.Colaboradores
+dbo	DadosBancarios	Id	uniqueidentifier	16	False	False	1	
+dbo	DadosBancarios	ColaboradorId	uniqueidentifier	16	False	False	0	dbo.Colaboradores
+dbo	DadosBancarios	NomeBanco	varchar	200	False	False	0	
+dbo	DadosBancarios	NumeroConta	varchar	50	False	False	0	
+dbo	DadosBancarios	TipoConta	varchar	50	False	False	0	
+dbo	DadosBancarios	Agencia	varchar	20	False	False	0	
+dbo	DadosPagamentoColaborador	Id	uniqueidentifier	16	False	False	1	
+dbo	DadosPagamentoColaborador	NrAno	int	4	False	False	0	
+dbo	DadosPagamentoColaborador	NrMes	int	4	False	False	0	
+dbo	DadosPagamentoColaborador	ColaboradorId	uniqueidentifier	16	False	False	0	
+dbo	DadosPagamentoColaborador	EmpresaOrigemId	uniqueidentifier	16	False	False	0	dbo.EmpresaOrigens
+dbo	DadosPagamentoColaborador	DtLiberacao	datetime2	8	False	False	0	
+dbo	DadosPagamentoColaborador	DtUploadNota	datetime2	8	True	False	0	
+dbo	DadosPagamentoColaborador	CaminhoNota	nvarchar	1000	True	False	0	
+dbo	DadosPagamentoColaborador	ValorNota	decimal	9	False	False	0	
+dbo	DadosPagamentoColaborador	Status	int	4	False	False	0	
+dbo	Departamentos	Id	uniqueidentifier	16	False	False	1	
+dbo	Departamentos	Nome	varchar	255	False	False	0	
+dbo	Departamentos	Ativo	bit	1	False	False	0	
+dbo	Departamentos	IdEmpresaSistema	uniqueidentifier	16	True	False	0	dbo.EmpresasSistema
+dbo	Departamentos	IdFilial	uniqueidentifier	16	True	False	0	dbo.Filiais
+dbo	DetalheCestaBasicas	Id	uniqueidentifier	16	False	False	1	
+dbo	DetalheCestaBasicas	CestaBasicaId	uniqueidentifier	16	False	False	0	dbo.CestasBasicas
+dbo	DetalheCestaBasicas	DtRecebimento	datetime2	8	True	False	0	
+dbo	DetalheCestaBasicas	QtdCesta	int	4	False	False	0	
+dbo	DetalheCestaBasicas	QtdPessoas	int	4	False	False	0	
+dbo	DetalheCestaBasicas	Valor	decimal	9	False	False	0	
+dbo	DetalheCestaBasicas	Observacao	nvarchar	-1	True	False	0	
+dbo	DetalhesEmprestimos	Id	uniqueidentifier	16	False	False	1	
+dbo	DetalhesEmprestimos	IdEmprestimoColaborador	uniqueidentifier	16	False	False	0	
+dbo	DetalhesEmprestimos	DataParcela	datetime2	8	False	False	0	
+dbo	DetalhesEmprestimos	Valorparcela	float	8	False	False	0	
+dbo	DetalhesEmprestimos	IcPago	bit	1	False	False	0	
+dbo	DetalhesEmprestimos	EmprestetimoColaboradorId	uniqueidentifier	16	False	False	0	dbo.EmprestimosColaboradores
+dbo	DetalheUploadTimeSheet	Id	uniqueidentifier	16	False	False	1	
+dbo	DetalheUploadTimeSheet	IdUploadTimeSheet	uniqueidentifier	16	False	False	0	dbo.UploadTimeSheet
+dbo	DetalheUploadTimeSheet	DtDetalhe	datetime	8	False	False	0	
+dbo	DetalheUploadTimeSheet	DescricaoAtividade	varchar	-1	False	False	0	
+dbo	DetalheUploadTimeSheet	Ficha	varchar	255	False	False	0	
+dbo	DetalheUploadTimeSheet	QtDHoras	float	8	False	False	0	
+dbo	DetalheUploadTimeSheet	Obs	varchar	255	False	False	0	
+dbo	DocumentosPerfil	Id	uniqueidentifier	16	False	False	1	
+dbo	DocumentosPerfil	DtUpload	datetime2	6	False	False	0	
+dbo	DocumentosPerfil	Nome	nvarchar	512	False	False	0	
+dbo	DocumentosPerfil	Caminho	nvarchar	1000	False	False	0	
+dbo	DocumentosPerfil	PerfilId	nvarchar	900	False	False	0	dbo.AspNetRoles
+dbo	DocumentosPerfil	UrlCaminho	nvarchar	2000	True	False	0	
+dbo	EmpresaOrigens	Id	uniqueidentifier	16	False	False	1	
+dbo	EmpresaOrigens	Nome	nvarchar	-1	True	False	0	
+dbo	EmpresaOrigens	RegimeTributacao	int	4	False	False	0	
+dbo	EmpresaOrigens	IcAtivo	bit	1	False	False	0	
+dbo	Empresas	Id	uniqueidentifier	16	False	False	1	
+dbo	Empresas	CodigoProjeto	nvarchar	-1	True	False	0	
+dbo	Empresas	Nome	varchar	255	False	False	0	
+dbo	Empresas	RazaoSocial	varchar	255	False	False	0	
+dbo	Empresas	CNPJ	varchar	18	False	False	0	
+dbo	Empresas	Telefone	varchar	18	True	False	0	
+dbo	Empresas	IncricaoEstadual	varchar	25	True	False	0	
+dbo	Empresas	IncricaoMunicipal	varchar	25	True	False	0	
+dbo	Empresas	DataIncio	date	3	True	False	0	
+dbo	Empresas	IsCliente	bit	1	False	False	0	
+dbo	Empresas	Observacao	varchar	255	True	False	0	
+dbo	Empresas	ICGeraRelatorioComValor	bit	1	True	False	0	
+dbo	EmpresasSistema	Id	uniqueidentifier	16	False	False	1	
+dbo	EmpresasSistema	RazaoSocial	nvarchar	400	False	False	0	
+dbo	EmpresasSistema	NomeFantasia	nvarchar	400	True	False	0	
+dbo	EmpresasSistema	Cnpj	nvarchar	40	False	False	0	
+dbo	EmpresasSistema	Email	nvarchar	300	True	False	0	
+dbo	EmpresasSistema	Telefone	nvarchar	40	True	False	0	
+dbo	EmpresasSistema	FusoHorario	nvarchar	200	True	False	0	
+dbo	EmpresasSistema	IcAtivo	bit	1	False	False	0	
+dbo	EmpresasSistema	DtCriacao	datetime2	8	False	False	0	
+dbo	EmpresasSistema	DtAtualizacao	datetime2	8	True	False	0	
+dbo	EmprestimosColaboradores	Id	uniqueidentifier	16	False	False	1	
+dbo	EmprestimosColaboradores	DataDoEmprestimo	datetime2	8	False	False	0	
+dbo	EmprestimosColaboradores	ValorTotal	float	8	False	False	0	
+dbo	EmprestimosColaboradores	ColaboradorId	uniqueidentifier	16	False	False	0	dbo.Colaboradores
+dbo	Enderecos	Id	uniqueidentifier	16	False	False	1	
+dbo	Enderecos	ColaboradorId	uniqueidentifier	16	False	False	0	dbo.Colaboradores
+dbo	Enderecos	CEP	nvarchar	-1	False	False	0	
+dbo	Enderecos	Rua	nvarchar	-1	True	False	0	
+dbo	Enderecos	Cidade	nvarchar	-1	True	False	0	
+dbo	Enderecos	Bairro	nvarchar	-1	True	False	0	
+dbo	Enderecos	Numero	nvarchar	-1	True	False	0	
+dbo	Enderecos	Ibge	nvarchar	-1	True	False	0	
+dbo	Enderecos	Uf	nvarchar	-1	True	False	0	
+dbo	Enderecos	Complemento	nvarchar	2000	True	False	0	
+dbo	Escolaridades	Id	uniqueidentifier	16	False	False	1	
+dbo	Escolaridades	Descricao	nvarchar	-1	False	False	0	
+dbo	Escolaridades	Ativo	bit	1	False	False	0	
+dbo	Escolaridades	NrOrdem	int	4	True	False	0	
+dbo	EventoColaboradores	Id	uniqueidentifier	16	False	False	1	
+dbo	EventoColaboradores	EventoId	uniqueidentifier	16	False	False	0	dbo.Eventos
+dbo	EventoColaboradores	ColaboradorId	uniqueidentifier	16	False	False	0	dbo.Colaboradores
+dbo	EventoColaboradores	DataInicio	datetime	8	False	False	0	
+dbo	EventoColaboradores	DataFim	datetime	8	False	False	0	
+dbo	EventoColaboradores	Descricao	varchar	1000	True	False	0	
+dbo	EventoColaboradores	CaminhoArquivo	nvarchar	-1	True	False	0	
+dbo	Eventos	Id	uniqueidentifier	16	False	False	1	
+dbo	Eventos	Descricao	varchar	255	False	False	0	
+dbo	Eventos	Ativo	bit	1	False	False	0	
+dbo	Feriados	Id	uniqueidentifier	16	False	False	1	
+dbo	Feriados	Descricao	varchar	255	False	False	0	
+dbo	Feriados	DataFeriado	datetime	8	False	False	0	
+dbo	Feriados	IdEmpresaSistema	uniqueidentifier	16	True	False	0	dbo.EmpresasSistema
+dbo	Feriados	IdFilial	uniqueidentifier	16	True	False	0	dbo.Filiais
+dbo	Feriados	IcAtivo	bit	1	False	False	0	
+dbo	Feriados	DtCriacao	datetime2	8	False	False	0	
+dbo	Feriados	DtAtualizacao	datetime2	8	True	False	0	
+dbo	Filiais	Id	uniqueidentifier	16	False	False	1	
+dbo	Filiais	IdEmpresaSistema	uniqueidentifier	16	False	False	0	dbo.EmpresasSistema
+dbo	Filiais	Nome	nvarchar	300	False	False	0	
+dbo	Filiais	Cnpj	nvarchar	40	True	False	0	
+dbo	Filiais	Email	nvarchar	300	True	False	0	
+dbo	Filiais	Telefone	nvarchar	40	True	False	0	
+dbo	Filiais	IcAtiva	bit	1	False	False	0	
+dbo	Filiais	DtCriacao	datetime2	8	False	False	0	
+dbo	Filiais	DtAtualizacao	datetime2	8	True	False	0	
+dbo	FolhaFixas	Id	uniqueidentifier	16	False	False	1	
+dbo	FolhaFixas	ColaboradorId	uniqueidentifier	16	False	False	0	dbo.Colaboradores
+dbo	FolhaFixas	Referencia	datetime2	8	False	False	0	
+dbo	FolhaFixas	TipoContratoId	uniqueidentifier	16	False	False	0	dbo.TipoContratos
+dbo	FolhaFixas	VlSalario	decimal	9	False	False	0	
+dbo	FolhaFixas	SetorFinanceiroId	uniqueidentifier	16	False	False	0	dbo.SetorFinanceiros
+dbo	FolhaFixas	VlLiquido	decimal	9	False	False	0	
+dbo	Folhas	Id	uniqueidentifier	16	False	False	1	
+dbo	Folhas	ColaboradorId	uniqueidentifier	16	True	False	0	dbo.Colaboradores
+dbo	Folhas	ColaboradorTechLeadId	uniqueidentifier	16	True	False	0	dbo.Colaboradores
+dbo	Folhas	ColaboradorDeliveryManagerId	uniqueidentifier	16	True	False	0	dbo.Colaboradores
+dbo	Folhas	ColaboradorControladoId	uniqueidentifier	16	True	False	0	dbo.Colaboradores
+dbo	Folhas	Referencia	datetime2	8	False	False	0	
+dbo	Folhas	ProjetoId	uniqueidentifier	16	True	False	0	dbo.ProjetoEmpresaColaboradores
+dbo	Folhas	VlHoraCusto	money	8	True	False	0	
+dbo	Folhas	VlCustoDeliveryManager	money	8	True	False	0	
+dbo	Folhas	VlCustoTechLead	money	8	True	False	0	
+dbo	Folhas	VlProjeto	money	8	True	False	0	
+dbo	Folhas	QtdHoras	float	8	True	False	0	
+dbo	Folhas	QtdHorasCobradas	float	8	True	False	0	
+dbo	Folhas	VlTotalCusto	money	8	True	False	0	
+dbo	Folhas	VlTotalProj	money	8	True	False	0	
+dbo	Folhas	ICVlProjFechado	bit	1	True	False	0	
+dbo	Folhas	VlProjetoFechado	money	8	True	False	0	
+dbo	Folhas	TipoFolha	int	4	False	False	0	
+dbo	Folhas	Observacao	nvarchar	-1	True	False	0	
+dbo	Folhas	ICCustoFechado	bit	1	False	False	0	
+dbo	Folhas	DtGeracaoFolha	datetime	8	True	False	0	
+dbo	Folhas	NrAno	int	4	True	False	0	
+dbo	Folhas	NrMes	int	4	True	False	0	
+dbo	Grupos	Id	uniqueidentifier	16	False	False	1	
+dbo	Grupos	Descricao	nvarchar	-1	False	False	0	
+dbo	Grupos	Ativo	bit	1	False	False	0	
+dbo	HistoricoBens	Id	uniqueidentifier	16	False	False	1	
+dbo	HistoricoBens	PatrimonioId	uniqueidentifier	16	False	False	0	dbo.Patrimonios
+dbo	HistoricoBens	DataHistorico	datetime	8	False	False	0	
+dbo	HistoricoBens	Evento	int	4	False	False	0	
+dbo	HistoricoBens	UsuarioId	uniqueidentifier	16	False	False	0	dbo.Colaboradores
+dbo	HistoricoBens	Motivo	nvarchar	1000	True	False	0	
+dbo	HistoricoPainelOcorrencias	Id	uniqueidentifier	16	False	False	1	
+dbo	HistoricoPainelOcorrencias	PainelDeOcorrenciaId	uniqueidentifier	16	True	False	0	dbo.PainelDeOcorrencias
+dbo	HistoricoPainelOcorrencias	UsuarioId	nvarchar	900	True	False	0	
+dbo	HistoricoPainelOcorrencias	Mensagem	nvarchar	-1	True	False	0	
+dbo	HistoricoPainelOcorrencias	CreateAt	datetime2	8	False	False	0	
+dbo	HistoricoTicket	Id	uniqueidentifier	16	False	False	1	
+dbo	HistoricoTicket	TicketId	uniqueidentifier	16	False	False	0	dbo.Ticket
+dbo	HistoricoTicket	DataHistorico	datetime	8	False	False	0	
+dbo	HistoricoTicket	Mensagem	nvarchar	-1	False	False	0	
+dbo	HistoricoTicket	EmailUsuario	nvarchar	510	False	False	0	
+dbo	HistoricoTicket	DataCriacao	datetime	8	False	False	0	
+dbo	HistoricoTicket	DataAtualizacao	datetime	8	False	False	0	
+dbo	HistoricoTicketAnexos	Id	uniqueidentifier	16	False	False	1	
+dbo	HistoricoTicketAnexos	HistoricoTicketId	uniqueidentifier	16	False	False	0	dbo.HistoricoTicket
+dbo	HistoricoTicketAnexos	NomeArquivo	nvarchar	510	False	False	0	
+dbo	HistoricoTicketAnexos	Caminho	nvarchar	1000	False	False	0	
+dbo	HistoricoVaga	IdVaga	uniqueidentifier	16	False	False	0	dbo.Vagas
+dbo	HistoricoVaga	DtHistorico	datetime	8	True	False	0	
+dbo	HistoricoVaga	Descricao	nvarchar	-1	True	False	0	
+dbo	HistoricoVaga	IdUsuario	nvarchar	900	True	False	0	dbo.AspNetUsers
+dbo	HistoricoVaga	Id	uniqueidentifier	16	False	False	1	
+dbo	HistoricoVaga	TipoHistorico	nvarchar	2	True	False	0	
+dbo	ImpostoConfigs	Id	uniqueidentifier	16	False	False	1	
+dbo	ImpostoConfigs	Nome	nvarchar	-1	False	False	0	
+dbo	ImpostoConfigs	Referencia	datetime2	8	False	False	0	
+dbo	ImpostoConfigs	Percentual	nvarchar	-1	False	False	0	
+dbo	ImpostoConfigs	IcRetido	bit	1	False	False	0	
+dbo	ImpostoConfigs	Tributacao	int	4	False	False	0	
+dbo	ImpostoPago	Id	uniqueidentifier	16	False	False	1	
+dbo	ImpostoPago	DataRef	datetime2	8	True	False	0	
+dbo	ImpostoPago	PercImposto	float	8	True	False	0	
+dbo	ImpostoPago	ValorImposto	float	8	True	False	0	
+dbo	ImpostoPago	ConfigContaId	uniqueidentifier	16	True	False	0	dbo.ConfigContas
+dbo	LancamentoPagamentos	Id	uniqueidentifier	16	False	False	1	
+dbo	LancamentoPagamentos	DtVencimento	datetime2	8	False	False	0	
+dbo	LancamentoPagamentos	Valor	decimal	9	False	False	0	
+dbo	LancamentoPagamentos	DtPrevisao	datetime2	8	False	False	0	
+dbo	LancamentoPagamentos	DtEmissao	datetime2	8	True	False	0	
+dbo	LancamentoPagamentos	Observacao	nvarchar	-1	True	False	0	
+dbo	LancamentoPagamentos	DtCadastro	datetime2	8	False	False	0	
+dbo	LancamentoPagamentos	FavorecidoId	uniqueidentifier	16	False	False	0	dbo.PessoaFavorecidos
+dbo	LancamentoPagamentos	CategoriaId	uniqueidentifier	16	False	False	0	dbo.Categorias
+dbo	LancamentoPagamentos	ConfigContaId	uniqueidentifier	16	False	False	0	dbo.ConfigContas
+dbo	LancamentoPagamentos	DtPagamento	datetime2	8	True	False	0	
+dbo	LancamentoPagamentos	TotalPago	decimal	9	True	False	0	
+dbo	LancamentoPagamentos	CaminhoComprovanteLancamento	nvarchar	-1	True	False	0	
+dbo	LancamentoPagamentos	Ativo	bit	1	False	False	0	
+dbo	lancamentosManuais	Id	uniqueidentifier	16	False	False	1	
+dbo	lancamentosManuais	IdUploadTimeSheet	uniqueidentifier	16	True	False	0	
+dbo	lancamentosManuais	UploadTimeSheetId	uniqueidentifier	16	True	False	0	
+dbo	lancamentosManuais	ColaboradorId	uniqueidentifier	16	True	False	0	dbo.Colaboradores
+dbo	lancamentosManuais	ProjetoEmpresaColaboradorId	uniqueidentifier	16	True	False	0	dbo.ProjetoEmpresaColaboradores
+dbo	LogDados	Id	uniqueidentifier	16	False	False	1	
+dbo	LogDados	Action	nvarchar	-1	False	False	0	
+dbo	LogDados	OriginalValues	nvarchar	-1	False	False	0	
+dbo	LogDados	NewValues	nvarchar	-1	False	False	0	
+dbo	LogDados	Date	datetime2	8	False	False	0	
+dbo	LogDados	IdentityUserId	nvarchar	900	True	False	0	dbo.AspNetUsers
+dbo	LogDados	IdIdentityUser	nvarchar	-1	False	False	0	
+dbo	LogEnvioEmail	Id	uniqueidentifier	16	False	False	1	
+dbo	LogEnvioEmail	Modulo	nvarchar	510	True	False	0	
+dbo	LogEnvioEmail	Remetente	nvarchar	640	False	False	0	
+dbo	LogEnvioEmail	Destinatarios	nvarchar	8000	False	False	0	
+dbo	LogEnvioEmail	Copia	nvarchar	8000	True	False	0	
+dbo	LogEnvioEmail	CopiaOculta	nvarchar	8000	True	False	0	
+dbo	LogEnvioEmail	Assunto	nvarchar	1000	False	False	0	
+dbo	LogEnvioEmail	Corpo	nvarchar	-1	False	False	0	
+dbo	LogEnvioEmail	DadosEmailJson	nvarchar	-1	True	False	0	
+dbo	LogEnvioEmail	Status	int	4	False	False	0	
+dbo	LogEnvioEmail	Tentativas	int	4	False	False	0	
+dbo	LogEnvioEmail	DataCriacaoUtc	datetime2	7	False	False	0	
+dbo	LogEnvioEmail	DataProcessamentoUtc	datetime2	7	True	False	0	
+dbo	LogEnvioEmail	DataEnvioUtc	datetime2	7	True	False	0	
+dbo	LogEnvioEmail	ProximaTentativaUtc	datetime2	7	True	False	0	
+dbo	LogEnvioEmail	UltimoErro	nvarchar	8000	True	False	0	
+dbo	LogEnvioEmail	CorrelationId	nvarchar	400	True	False	0	
+dbo	LogEnvioEmail	RowVersion	timestamp	8	False	False	0	
+dbo	LogFolha	Id	uniqueidentifier	16	False	False	1	
+dbo	LogFolha	ColaboradorId	nvarchar	900	True	False	0	dbo.AspNetUsers
+dbo	LogFolha	DtCriacao	datetime	8	True	False	0	
+dbo	LogFolhaDetalheAPagar	Id	uniqueidentifier	16	False	False	1	
+dbo	LogFolhaDetalheAPagar	LogFolhaId	uniqueidentifier	16	False	False	0	dbo.LogFolha
+dbo	LogFolhaDetalheAPagar	ColaboradorId	uniqueidentifier	16	True	False	0	dbo.Colaboradores
+dbo	LogFolhaDetalheAPagar	IcRegerou	bit	1	False	False	0	
+dbo	LogFolhaDetalheAPagar	EmpresaOrigem	nvarchar	-1	False	False	0	
+dbo	LogFolhaDetalheAPagar	Pagamento	money	8	True	False	0	
+dbo	LogFolhaDetalheAPagar	Periodo	datetime	8	True	False	0	
+dbo	LogFolhaDetalheAPagar	Status	nvarchar	-1	True	False	0	
+dbo	LogFolhaDetalheAPagar	NrAno	int	4	True	False	0	
+dbo	LogFolhaDetalheAPagar	NrMes	int	4	True	False	0	
+dbo	LogFolhaDetalheAPagar	DtGeracaoFolha	datetime	8	True	False	0	
+dbo	LogFolhaDetalheAPagar	TipoFolha	int	4	False	False	0	
+dbo	LogFolhaDetalheAPagar	Observacao	nvarchar	-1	True	False	0	
+dbo	LogFolhaDetalheAReceber	Id	uniqueidentifier	16	False	False	1	
+dbo	LogFolhaDetalheAReceber	LogFolhaId	uniqueidentifier	16	False	False	0	dbo.LogFolha
+dbo	LogFolhaDetalheAReceber	EmpresaId	uniqueidentifier	16	True	False	0	dbo.Empresas
+dbo	LogFolhaDetalheAReceber	EmpresaOrigemId	uniqueidentifier	16	True	False	0	dbo.Empresas
+dbo	LogFolhaDetalheAReceber	IcRegerou	bit	1	False	False	0	
+dbo	LogFolhaDetalheAReceber	ValorNota	money	8	True	False	0	
+dbo	LogFolhaDetalheAReceber	Periodo	datetime	8	True	False	0	
+dbo	LogFolhaDetalheAReceber	NrAno	int	4	True	False	0	
+dbo	LogFolhaDetalheAReceber	NrMes	int	4	True	False	0	
+dbo	LogFolhaDetalheAReceber	DtGeracaoFolha	datetime	8	True	False	0	
+dbo	LogFolhaDetalheAReceber	TipoFolha	int	4	False	False	0	
+dbo	LogFolhaDetalheAReceber	Observacao	nvarchar	-1	True	False	0	
+dbo	LogPainelDeOcorrencia	Id	int	4	False	True	1	
+dbo	LogPainelDeOcorrencia	Datalog	datetime	8	False	False	0	
+dbo	LogPainelDeOcorrencia	Mensagem	nvarchar	-1	False	False	0	
+dbo	LogPainelDeOcorrencia	UsuarioId	nvarchar	900	True	False	0	dbo.AspNetUsers
+dbo	LogPainelDeOcorrencia	ColaboradorId	uniqueidentifier	16	True	False	0	dbo.Colaboradores
+dbo	LogProjetoColaborador	Id	uniqueidentifier	16	False	False	1	
+dbo	LogProjetoColaborador	DtAlteracao	datetime	8	False	False	0	
+dbo	LogProjetoColaborador	Operacao	varchar	10	False	False	0	
+dbo	LogProjetoColaborador	ColaboradorId	uniqueidentifier	16	False	False	0	
+dbo	LogProjetoColaborador	JsonOperacao	nvarchar	-1	True	False	0	
+dbo	LogProjetoColaborador	JsonOperacaoLog	nvarchar	-1	True	False	0	
+dbo	LogTicket	Id	uniqueidentifier	16	False	False	1	
+dbo	LogTicket	TicketId	uniqueidentifier	16	False	False	0	dbo.Ticket
+dbo	LogTicket	DataLog	datetime	8	False	False	0	
+dbo	LogTicket	EmailUsuario	nvarchar	510	False	False	0	
+dbo	LogTicket	DataCriacao	datetime	8	False	False	0	
+dbo	LogTicket	DataAtualizacao	datetime	8	False	False	0	
+dbo	LogTicket	Campo	nvarchar	200	False	False	0	
+dbo	LogTicket	ValorAntes	nvarchar	-1	True	False	0	
+dbo	LogTicket	ValorDepois	nvarchar	-1	True	False	0	
+dbo	Modulos	Id	uniqueidentifier	16	False	False	1	
+dbo	Modulos	Nome	nvarchar	200	False	False	0	
+dbo	Modulos	IcAtivo	bit	1	False	False	0	
+dbo	ModulosPerfis	Id	uniqueidentifier	16	False	False	1	
+dbo	ModulosPerfis	IdModulo	uniqueidentifier	16	False	False	0	dbo.Modulos
+dbo	ModulosPerfis	IdPerfil	nvarchar	900	False	False	0	dbo.AspNetRoles
+dbo	MotivoDesligamento	Id	uniqueidentifier	16	False	False	1	
+dbo	MotivoDesligamento	Descricao	varchar	255	False	False	0	
+dbo	MotivoDesligamento	Ativo	bit	1	False	False	0	
+dbo	Notificacoes	Id	uniqueidentifier	16	False	False	1	
+dbo	Notificacoes	UsuarioId	nvarchar	900	False	False	0	dbo.AspNetUsers
+dbo	Notificacoes	DtNotificacao	datetime	8	False	False	0	
+dbo	Notificacoes	NmNotificacao	nvarchar	-1	False	False	0	
+dbo	Notificacoes	IcLida	bit	1	False	False	0	
+dbo	Notificacoes	Modulo	nvarchar	510	False	False	0	
+dbo	Notificacoes	Gerador	nvarchar	510	False	False	0	
+dbo	Notificacoes	DtLida	datetime	8	True	False	0	
+dbo	Notificacoes	DataCriacao	datetime	8	False	False	0	
+dbo	Notificacoes	DataAtualizacao	datetime	8	True	False	0	
+dbo	Notificacoes	Link	nvarchar	-1	True	False	0	
+dbo	PainelDeOcorrencias	Id	uniqueidentifier	16	False	False	1	
+dbo	PainelDeOcorrencias	ColaboradorId	uniqueidentifier	16	True	False	0	dbo.Colaboradores
+dbo	PainelDeOcorrencias	ClienteId	uniqueidentifier	16	True	False	0	dbo.Empresas
+dbo	PainelDeOcorrencias	ContratoId	uniqueidentifier	16	True	False	0	dbo.Contratos
+dbo	PainelDeOcorrencias	DtOcorrencia	datetime2	8	False	False	0	
+dbo	PainelDeOcorrencias	TipoDeOcorrencia	int	4	False	False	0	
+dbo	PainelDeOcorrencias	Relatado	int	4	False	False	0	
+dbo	PainelDeOcorrencias	StatusDaOcorrencia	int	4	False	False	0	
+dbo	PainelDeOcorrencias	NecessitaAcao	bit	1	False	False	0	
+dbo	PainelDeOcorrencias	Descricao	nvarchar	-1	True	False	0	
+dbo	PainelDeOcorrencias	CaminhoArquivo	nvarchar	1000	False	False	0	
+dbo	PainelDeOcorrencias	ResponsavelAcaoId	uniqueidentifier	16	True	False	0	
+dbo	PainelDeOcorrencias	UsuarioId	nvarchar	900	True	False	0	dbo.AspNetUsers
+dbo	PainelDeOcorrencias	DtEncerramento	datetime	8	True	False	0	
+dbo	Papeis	Id	uniqueidentifier	16	False	False	1	
+dbo	Papeis	Nome	nvarchar	400	False	False	0	
+dbo	Papeis	NomeNormalizado	nvarchar	400	False	False	0	
+dbo	Papeis	Ativo	bit	1	False	False	0	
+dbo	Papeis	DataCriacao	datetime2	8	False	False	0	
+dbo	PapelAlias	Id	uniqueidentifier	16	False	False	1	
+dbo	PapelAlias	PapelId	uniqueidentifier	16	False	False	0	dbo.Papeis
+dbo	PapelAlias	Alias	nvarchar	400	False	False	0	
+dbo	PapelAlias	AliasNormalizado	nvarchar	400	False	False	0	
+dbo	PapelAlias	Ativo	bit	1	False	False	0	
+dbo	PapelAlias	DataCriacao	datetime2	8	False	False	0	
+dbo	Patrimonios	Id	uniqueidentifier	16	False	False	1	
+dbo	Patrimonios	NumeroDeSerie	nvarchar	-1	True	False	0	
+dbo	Patrimonios	Modelo	nvarchar	-1	True	False	0	
+dbo	Patrimonios	Especificacoes	nvarchar	-1	True	False	0	
+dbo	Patrimonios	Perifericos	nvarchar	-1	True	False	0	
+dbo	Patrimonios	ColaboradoresId	uniqueidentifier	16	True	False	0	dbo.Colaboradores
+dbo	Patrimonios	Observacao	nvarchar	-1	True	False	0	
+dbo	Patrimonios	NumeroPatrimonio	nvarchar	-1	True	False	0	
+dbo	Patrimonios	TipoBemId	uniqueidentifier	16	True	False	0	dbo.TipoBem
+dbo	Patrimonios	Valor	decimal	9	True	False	0	
+dbo	Patrimonios	DataAquisicao	datetime	8	True	False	0	
+dbo	Patrimonios	DtBaixa	datetime	8	True	False	0	
+dbo	Patrimonios	DescricaoBaixa	varchar	500	True	False	0	
+dbo	PessoaFavorecidos	Id	uniqueidentifier	16	False	False	1	
+dbo	PessoaFavorecidos	Nome	nvarchar	-1	False	False	0	
+dbo	PessoaFavorecidos	Banco	nvarchar	-1	True	False	0	
+dbo	PessoaFavorecidos	Agencia	nvarchar	-1	True	False	0	
+dbo	PessoaFavorecidos	Digito	int	4	True	False	0	
+dbo	PessoaFavorecidos	ContaCorrente	nvarchar	-1	True	False	0	
+dbo	ProjetoEmpresaColaboradores	Id	uniqueidentifier	16	False	False	1	
+dbo	ProjetoEmpresaColaboradores	ContratoId	uniqueidentifier	16	True	False	0	dbo.Contratos
+dbo	ProjetoEmpresaColaboradores	ColaboradorId	uniqueidentifier	16	False	False	0	dbo.Colaboradores
+dbo	ProjetoEmpresaColaboradores	ColaboradorTechLeadId	uniqueidentifier	16	True	False	0	dbo.Colaboradores
+dbo	ProjetoEmpresaColaboradores	ColaboradorDeliveryManagerId	uniqueidentifier	16	True	False	0	dbo.Colaboradores
+dbo	ProjetoEmpresaColaboradores	CustoTechLead	money	8	True	False	0	
+dbo	ProjetoEmpresaColaboradores	CustoDeliveryManager	money	8	True	False	0	
+dbo	ProjetoEmpresaColaboradores	DataInicio	datetime2	8	False	False	0	
+dbo	ProjetoEmpresaColaboradores	DataFim	datetime2	8	True	False	0	
+dbo	ProjetoEmpresaColaboradores	Valor	money	8	True	False	0	
+dbo	ProjetoEmpresaColaboradores	Custo	money	8	True	False	0	
+dbo	ProjetoEmpresaColaboradores	Ativo	bit	1	False	False	0	
+dbo	ProjetoEmpresaColaboradores	ICValorFechado	bit	1	False	False	0	
+dbo	ProjetoEmpresaColaboradores	ICValorTechLeadFechado	bit	1	False	False	0	
+dbo	ProjetoEmpresaColaboradores	ICParadorCustoTL	bit	1	False	False	0	
+dbo	ProjetoEmpresaColaboradores	FlagValorAcordado	bit	1	False	False	0	
+dbo	ProjetoEmpresaColaboradores	ValorAcordado	money	8	True	False	0	
+dbo	ProjetoEmpresaColaboradores	DataFimTechLead	datetime2	8	True	False	0	
+dbo	ProjetoEmpresaColaboradores	ObservacaoRelatorio	nvarchar	-1	True	False	0	
+dbo	ProjetoEmpresaColaboradores	DescontoRelatorio	nvarchar	-1	True	False	0	
+dbo	ReclamacoesDenuncias	Id	uniqueidentifier	16	False	False	1	
+dbo	ReclamacoesDenuncias	Data	datetime	8	False	False	0	
+dbo	ReclamacoesDenuncias	Texto	nvarchar	4000	False	False	0	
+dbo	RefreshTokens	Id	uniqueidentifier	16	False	False	1	
+dbo	RefreshTokens	UserId	nvarchar	900	False	False	0	dbo.AspNetUsers
+dbo	RefreshTokens	TokenHash	nvarchar	256	False	False	0	
+dbo	RefreshTokens	CreatedAtUtc	datetime2	6	False	False	0	
+dbo	RefreshTokens	ExpiresAtUtc	datetime2	6	False	False	0	
+dbo	RefreshTokens	RevokedAtUtc	datetime2	6	True	False	0	
+dbo	RefreshTokens	ReplacedByTokenHash	nvarchar	256	True	False	0	
+dbo	Senioridades	Id	uniqueidentifier	16	False	False	1	
+dbo	Senioridades	Descricao	varchar	255	False	False	0	
+dbo	Senioridades	Ativo	bit	1	False	False	0	
+dbo	SetorFinanceiros	Id	uniqueidentifier	16	False	False	1	
+dbo	SetorFinanceiros	Descricao	nvarchar	-1	False	False	0	
+dbo	SetorFinanceiros	Ativo	bit	1	False	False	0	
+dbo	SkillAlias	Id	uniqueidentifier	16	False	False	1	
+dbo	SkillAlias	SkillId	uniqueidentifier	16	False	False	0	dbo.Skills
+dbo	SkillAlias	Alias	nvarchar	400	False	False	0	
+dbo	SkillAlias	AliasNormalizado	nvarchar	400	False	False	0	
+dbo	SkillAlias	Ativo	bit	1	False	False	0	
+dbo	SkillAlias	DataCriacao	datetime2	8	False	False	0	
+dbo	Skills	Id	uniqueidentifier	16	False	False	1	
+dbo	Skills	Nome	nvarchar	-1	False	False	0	
+dbo	Skills	CategoriaSkillId	uniqueidentifier	16	True	False	0	dbo.CategoriaSkills
+dbo	Skills	Ativo	bit	1	False	False	0	
+dbo	StatusJuridicos	ID	uniqueidentifier	16	False	False	0	
+dbo	StatusJuridicos	Descricao	varchar	255	False	False	0	
+dbo	StatusJuridicos	Ativo	bit	1	False	False	0	
+dbo	StatusVaga	Id	uniqueidentifier	16	False	False	1	
+dbo	StatusVaga	Descricao	nvarchar	200	False	False	0	
+dbo	StatusVaga	Ativo	bit	1	False	False	0	
+dbo	SugestoesReclamacoes	Id	uniqueidentifier	16	False	False	1	
+dbo	SugestoesReclamacoes	UsuarioId	nvarchar	900	True	False	0	dbo.AspNetUsers
+dbo	SugestoesReclamacoes	Area	nvarchar	200	True	False	0	
+dbo	SugestoesReclamacoes	Status	nvarchar	40	False	False	0	
+dbo	SugestoesReclamacoes	Titulo	nvarchar	400	False	False	0	
+dbo	SugestoesReclamacoes	Descricao	nvarchar	4000	False	False	0	
+dbo	SugestoesReclamacoes	DtCriacao	datetime2	6	False	False	0	
+dbo	SugestoesReclamacoes	DtAcao	datetime2	6	True	False	0	
+dbo	sysdiagrams	name	sysname	256	False	False	0	
+dbo	sysdiagrams	principal_id	int	4	False	False	0	
+dbo	sysdiagrams	diagram_id	int	4	False	True	1	
+dbo	sysdiagrams	version	int	4	True	False	0	
+dbo	sysdiagrams	definition	varbinary	-1	True	False	0	
+dbo	Ticket	Id	uniqueidentifier	16	False	False	1	
+dbo	Ticket	Titulo	nvarchar	400	False	False	0	
+dbo	Ticket	Descricao	nvarchar	-1	False	False	0	
+dbo	Ticket	EmailUsuarioSolicitante	nvarchar	510	False	False	0	
+dbo	Ticket	EmailUsuarioResponsavel	nvarchar	510	True	False	0	
+dbo	Ticket	Tags	nvarchar	-1	True	False	0	
+dbo	Ticket	TipoTarefaId	uniqueidentifier	16	False	False	0	dbo.TipoTarefa
+dbo	Ticket	AreaId	uniqueidentifier	16	False	False	0	dbo.Area
+dbo	Ticket	Prioridade	int	4	False	False	0	
+dbo	Ticket	Status	int	4	False	False	0	
+dbo	Ticket	DataCriacao	datetime	8	False	False	0	
+dbo	Ticket	DataAtualizacao	datetime	8	False	False	0	
+dbo	Ticket	DataVencimento	datetime2	6	True	False	0	
+dbo	Ticket	IcDataRepactuacao	bit	1	False	False	0	
+dbo	Ticket	DataRepactuacao	datetime2	6	True	False	0	
+dbo	Ticket	DtConclusao	datetime	8	True	False	0	
+dbo	Ticket	ResponsavelId	uniqueidentifier	16	True	False	0	dbo.Colaboradores
+dbo	Ticket	NumeroTicket	bigint	8	False	False	0	
+dbo	TimeSheets	Id	uniqueidentifier	16	False	False	1	
+dbo	TimeSheets	NomeDev	varchar	255	False	False	0	
+dbo	TimeSheets	EmailDev	varchar	255	False	False	0	
+dbo	TimeSheets	EmailUpload	varchar	255	False	False	0	
+dbo	TimeSheets	DataUpload	datetime2	8	False	False	0	
+dbo	TimeSheets	Cliente	nvarchar	-1	False	False	0	
+dbo	TimeSheets	Telefone	nvarchar	-1	False	False	0	
+dbo	TimeSheets	Projeto	nvarchar	-1	False	False	0	
+dbo	TimeSheets	Tipo	nvarchar	-1	False	False	0	
+dbo	TimeSheets	Observacao	nvarchar	-1	False	False	0	
+dbo	TimeSheets	Total	nvarchar	-1	False	False	0	
+dbo	TimeSheets	Ano	nvarchar	-1	False	False	0	
+dbo	TimeSheets	Mes	nvarchar	-1	False	False	0	
+dbo	TimeSheets	EmailDoColaborador	nvarchar	-1	False	False	0	
+dbo	TimeSheets	TipoAtivo	nvarchar	-1	False	False	0	
+dbo	TimeSheets	IdProjeto	nvarchar	-1	False	False	0	
+dbo	TimeSheets	Faltas	varchar	255	False	False	0	
+dbo	TimeSheets	Atrasos	varchar	255	False	False	0	
+dbo	TipoBem	Id	uniqueidentifier	16	False	False	1	
+dbo	TipoBem	Descricao	nvarchar	-1	False	False	0	
+dbo	TipoBem	Ativo	bit	1	False	False	0	
+dbo	TipoContratos	Id	uniqueidentifier	16	False	False	1	
+dbo	TipoContratos	Descricao	nvarchar	-1	False	False	0	
+dbo	TipoContratos	Ativo	bit	1	False	False	0	
+dbo	TipoDocumento	Id	uniqueidentifier	16	False	False	1	
+dbo	TipoDocumento	Descricao	varchar	255	False	False	0	
+dbo	TipoDocumento	Ativo	bit	1	False	False	0	
+dbo	TipoTarefa	Id	uniqueidentifier	16	False	False	1	
+dbo	TipoTarefa	Nome	nvarchar	510	False	False	0	
+dbo	TipoTarefa	Ordem	int	4	True	False	0	
+dbo	TipoTarefa	Ativo	bit	1	False	False	0	
+dbo	TipoTarefa	DataCriacao	datetime2	8	True	False	0	
+dbo	TipoTarefa	DataAtualizacao	datetime2	8	True	False	0	
+dbo	TipoTicket	Id	uniqueidentifier	16	False	False	1	
+dbo	TipoTicket	Descricao	nvarchar	400	False	False	0	
+dbo	TipoTicket	Ativo	bit	1	False	False	0	
+dbo	UploadTimeSheet	Id	uniqueidentifier	16	False	False	1	
+dbo	UploadTimeSheet	IdColaborador	uniqueidentifier	16	True	False	0	dbo.Colaboradores
+dbo	UploadTimeSheet	IdCliente	uniqueidentifier	16	True	False	0	dbo.Empresas
+dbo	UploadTimeSheet	DtUpload	datetime	8	False	False	0	
+dbo	UploadTimeSheet	IdColaboradorUpload	uniqueidentifier	16	True	False	0	dbo.Colaboradores
+dbo	UploadTimeSheet	NrAno	int	4	False	False	0	
+dbo	UploadTimeSheet	NrMes	int	4	False	False	0	
+dbo	UploadTimeSheet	Tipo	char	1	False	False	0	
+dbo	UploadTimeSheet	TotalHoras	float	8	False	False	0	
+dbo	UploadTimeSheet	HorasCobradas	float	8	False	False	0	
+dbo	UploadTimeSheet	ICfolhaGerada	bit	1	False	False	0	
+dbo	UploadTimeSheet	Observacao	nvarchar	-1	True	False	0	
+dbo	UploadTimeSheet	ICAlteracaoManual	bit	1	False	False	0	
+dbo	UploadTimeSheet	ICAprovadoCliente	bit	1	False	False	0	
+dbo	UploadTimeSheet	NrAvAssiduidade	int	4	False	False	0	
+dbo	UploadTimeSheet	NrAvPreenchimentoDevops	int	4	False	False	0	
+dbo	UploadTimeSheet	NrAvComunicacao	int	4	False	False	0	
+dbo	UploadTimeSheet	NrAvProatividade	int	4	False	False	0	
+dbo	UploadTimeSheet	AvDescricao	nvarchar	-1	True	False	0	
+dbo	UploadTimeSheet	VlMediaAvaliacao	decimal	9	False	False	0	
+dbo	UploadTimeSheet	ContratoId	uniqueidentifier	16	True	False	0	dbo.Contratos
+dbo	UploadTimeSheet	ICNotificacaoFaturamentoEnviada	bit	1	False	False	0	
+dbo	UploadTimeSheet	DtAprovacao	datetime	8	True	False	0	
+dbo	UploadTimeSheetBody	Id	uniqueidentifier	16	False	False	1	
+dbo	UploadTimeSheetBody	IdUploadTimeSheet	uniqueidentifier	16	False	False	0	dbo.UploadTimeSheet
+dbo	UploadTimeSheetBody	DtDetalhe	datetime2	8	False	False	0	
+dbo	UploadTimeSheetBody	DescricaoAtividade	nvarchar	-1	False	False	0	
+dbo	UploadTimeSheetBody	Inicio	nvarchar	-1	False	False	0	
+dbo	UploadTimeSheetBody	Fim	nvarchar	-1	False	False	0	
+dbo	UploadTimeSheetBody	QtDHoras	nvarchar	-1	False	False	0	
+dbo	UploadTimeSheetBody	Task	nvarchar	-1	False	False	0	
+dbo	UploadTimeSheetBody	Obs	nvarchar	-1	False	False	0	
+dbo	UsuariosEmpresasSistema	Id	uniqueidentifier	16	False	False	1	
+dbo	UsuariosEmpresasSistema	IdUsuario	nvarchar	900	False	False	0	dbo.AspNetUsers
+dbo	UsuariosEmpresasSistema	IdEmpresaSistema	uniqueidentifier	16	False	False	0	dbo.EmpresasSistema
+dbo	UsuariosEmpresasSistema	IcAtivo	bit	1	False	False	0	
+dbo	UsuariosEmpresasSistema	DtCriacao	datetime2	8	False	False	0	
+dbo	Vagas	Id	uniqueidentifier	16	False	False	1	
+dbo	Vagas	Descricao	nvarchar	-1	False	False	0	
+dbo	Vagas	AberturaVaga	datetime2	8	False	False	0	
+dbo	Vagas	FechamentoVaga	datetime2	8	True	False	0	
+dbo	Vagas	Obs	nvarchar	-1	True	False	0	
+dbo	Vagas	IdVendedor	nvarchar	900	False	False	0	dbo.AspNetUsers
+dbo	Vagas	IdStatus	uniqueidentifier	16	False	False	0	dbo.StatusVaga
+dbo	Vagas	NmAnexo	nvarchar	-1	True	False	0	
+dbo	Vagas	NmDescricaoEncerramento	nvarchar	-1	True	False	0	
+dbo	Vagas	IcRemoto	bit	1	False	False	0	
+dbo	Vagas	Localidade	nvarchar	510	True	False	0	
+dbo	Vagas	NmCliente	nvarchar	510	True	False	0	
+dbo	Vagas	QtdVagas	int	4	True	False	0	
+dbo	Vagas	StatusVaga	nvarchar	-1	True	False	0	
+dbo	Vagas	EmpresaId	uniqueidentifier	16	True	False	0	dbo.Empresas
+dbo	Vagas	Titulo	nvarchar	400	True	False	0	
+dbo	Vagas	DescricaoNormalizada	nvarchar	-1	True	False	0	
+dbo	VagasSkills	Id	uniqueidentifier	16	False	False	1	
+dbo	VagasSkills	VagaId	uniqueidentifier	16	True	False	0	dbo.Vagas
+dbo	VagasSkills	SkillId	uniqueidentifier	16	True	False	0	dbo.Skills
+dbo	VagasSkills	SenioridadeId	uniqueidentifier	16	True	False	0	dbo.Senioridades

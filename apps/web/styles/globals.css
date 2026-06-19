@@ -1,0 +1,9 @@
+@import "tailwindcss";
+@config "../tailwind.config.ts";
+@import "./theme.css";
+
+@layer base {
+  body {
+    @apply bg-ap-black text-ap-text font-sans antialiased;
+  }
+}

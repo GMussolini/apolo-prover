@@ -1,0 +1,120 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: Tarefas
+base: crm
+linhas_aprox: 13090
+tamanho_mb: 12.64
+chave_primaria: [Id]
+usado_por_dominios: [CRM_OPERACAO_VENDEDOR]
+descricao: "Atividades/follow-ups dos vendedores no CRM (ligações, e-mails, reuniões, lembretes) vinculadas a um cliente e, opcionalmente, a um contato. Cada linha é uma tarefa agendada com data e estado de execução."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Identificador único da tarefa."
+  - nome: UsuarioID
+    tipo: varchar
+    nulo: false
+    fk_para: dbo.AspNetUsers
+    descricao: "FK para o vendedor responsável (AspNetUsers.Id). JOIN para obter Email/UserName do vendedor."
+  - nome: TipoTarefaID
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.TipoTarefas
+    descricao: "FK para o tipo da tarefa (TipoTarefas.Id) — rótulo legível em TipoTarefas.Descricao."
+  - nome: ClientID
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.Clients
+    descricao: "FK para o cliente vinculado (Clients.Id). Nome da empresa vem de Clients.RazaoSocial."
+  - nome: Data
+    tipo: datetime
+    nulo: false
+    descricao: "Data agendada da tarefa. É o campo de agendamento usado para 'pendente'/'atrasada'."
+  - nome: Hora
+    tipo: time
+    nulo: false
+    descricao: "Hora agendada da tarefa (complementa Data)."
+  - nome: NotificarEmail
+    tipo: bit
+    nulo: false
+    descricao: "1 = enviar notificação por e-mail sobre a tarefa; 0 = não notificar."
+  - nome: Descricao
+    tipo: nvarchar
+    nulo: false
+    descricao: "Texto descritivo/título da tarefa (o que deve ser feito)."
+  - nome: DtReturn
+    tipo: datetime
+    nulo: false
+    descricao: "Data de retorno/reagendamento previsto (próximo follow-up)."
+  - nome: TarefaExecutada
+    tipo: bit
+    nulo: false
+    descricao: "1 = tarefa concluída; 0 = pendente. Base do conceito 'concluída' no domínio."
+  - nome: ComentarioExecucao
+    tipo: nvarchar
+    nulo: false
+    descricao: "Comentário registrado pelo vendedor ao executar/concluir a tarefa."
+  - nome: DataExecucao
+    tipo: datetime
+    nulo: false
+    descricao: "Data de execução. SÓ é confiável quando TarefaExecutada=1 — vem preenchida (default) mesmo em tarefas pendentes, então NÃO use DataExecucao IS NULL como sinal de conclusão/atraso. Para concluída/atrasada use TarefaExecutada."
+  - nome: LinkMeeting
+    tipo: nvarchar
+    nulo: false
+    descricao: "Link da reunião associada à tarefa (Meet/Teams), quando houver."
+  - nome: DelegadoParaId
+    tipo: varchar
+    nulo: false
+    descricao: "Id do usuário para quem a tarefa foi delegada (AspNetUsers), quando aplicável."
+  - nome: QtdAdiamento
+    tipo: int
+    nulo: false
+    descricao: "Quantidade de vezes que a tarefa foi adiada/reagendada."
+  - nome: ClientContactId
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.ClientContacts
+    descricao: "FK para o contato específico do cliente (ClientContacts.Id). Nome do contato vem de ClientContacts.Name."
+  - nome: Canal
+    tipo: int
+    nulo: false
+    descricao: "Canal da tarefa como código inteiro (ex.: telefone, e-mail, WhatsApp). NÃO é o tipo da tarefa — para tipo use TipoTarefaID."
+  - nome: GeradaPorIa
+    tipo: bit
+    nulo: false
+    descricao: "1 = tarefa criada automaticamente pela IA (cadência/sugestão); 0 = criada manualmente."
+  - nome: IaSuggestionId
+    tipo: uniqueidentifier
+    nulo: false
+    descricao: "Id da sugestão de IA que originou a tarefa, quando GeradaPorIa = 1."
+  - nome: RascunhoMensagem
+    tipo: nvarchar
+    nulo: false
+    descricao: "Rascunho de mensagem (e-mail/WhatsApp) gerado para a tarefa, geralmente pela IA."
+
+relacionamentos:
+  - "Tarefas.UsuarioID -> dbo.AspNetUsers"
+  - "Tarefas.TipoTarefaID -> dbo.TipoTarefas"
+  - "Tarefas.ClientID -> dbo.Clients"
+  - "Tarefas.ClientContactId -> dbo.ClientContacts"
+
+gotchas:
+  - "Vendedor: JOIN por Tarefas.UsuarioID = AspNetUsers.Id (não há e-mail direto na tabela). Use u.Email / u.UserName."
+  - "Concluída usa `TarefaExecutada = 1`; data de conclusão (DataExecucao) só é válida quando TarefaExecutada=1. Atrasada = TarefaExecutada = 0 AND Data < GETDATE(). NÃO use DataExecucao IS NULL: DataExecucao vem preenchida (default) mesmo em tarefas não executadas (~89% das pendentes), subcontando atrasadas em ~9x."
+  - "Campo de agendamento é `Data` (datetime), não 'DataAgendada'. A hora separada fica em `Hora`."
+  - "Tipo da tarefa é o lookup `TipoTarefas.Descricao` via TipoTarefaID — NÃO confunda com a coluna `Canal` (código inteiro de meio de contato)."
+  - "Nome do cliente vem de Clients.RazaoSocial (Clients NÃO tem 'Nome'); nome do contato vem de ClientContacts.Name."
+  - "Não usar LogTarefa (~70 MB de auditoria) — fora da whitelist do domínio por design."
+
+queries_exemplo:
+  - pergunta: "Quantas tarefas atrasadas o vendedor foliveira tem?"
+    sql: "SELECT COUNT(*) AS total FROM Tarefas t LEFT JOIN AspNetUsers u ON u.Id = t.UsuarioID WHERE u.Email = 'foliveira@provertec.com.br' AND t.TarefaExecutada = 0 AND t.Data < GETDATE()"
+  - pergunta: "Distribuição de tarefas por tipo nos últimos 30 dias"
+    sql: "SELECT tt.Descricao AS tipo, COUNT(*) AS total FROM Tarefas t LEFT JOIN TipoTarefas tt ON tt.Id = t.TipoTarefaID WHERE t.Data >= DATEADD(day,-30,GETDATE()) GROUP BY tt.Descricao ORDER BY total DESC"
+  - pergunta: "Tarefas pendentes por vendedor"
+    sql: "SELECT u.UserName AS vendedor, COUNT(*) AS pendentes FROM Tarefas t LEFT JOIN AspNetUsers u ON u.Id = t.UsuarioID WHERE t.TarefaExecutada = 0 GROUP BY u.UserName ORDER BY pendentes DESC"
+  - pergunta: "Quantas tarefas foram geradas pela IA neste mês?"
+    sql: "SELECT COUNT(*) AS total FROM Tarefas t WHERE t.GeradaPorIa = 1 AND t.Data >= DATEADD(day,-30,GETDATE())"

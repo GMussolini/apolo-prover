@@ -1,0 +1,42 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: FaseVendas
+base: crm
+linhas_aprox: 6
+tamanho_mb: 0.07
+chave_primaria: [Id]
+usado_por_dominios: [CRM_PIPELINE]
+descricao: "Tabela de domínio (lookup) com as fases de venda de um cliente já no funil de Clients (ex.: 'Proposta', 'Negociação'). Referenciada por Clients.FaseVendaID; indica em que etapa do fechamento o cliente está."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Chave primária da fase; alvo de Clients.FaseVendaID."
+  - nome: Descricao
+    tipo: nvarchar
+    nulo: false
+    descricao: "Texto legível da fase de venda (ex.: 'Proposta', 'Negociação'). É ESTE campo que aparece nas respostas/filtros — não há coluna 'Nome'."
+  - nome: Ativo
+    tipo: bit
+    nulo: false
+    descricao: "Indica se a fase está ativa/disponível para uso (1) ou desativada (0)."
+  - nome: Ordem
+    tipo: int
+    nulo: false
+    descricao: "Ordem de exibição da fase no funil de vendas (sequência das etapas)."
+
+relacionamentos:
+  []
+
+gotchas:
+  - "O texto da fase fica em Descricao, NÃO em 'Nome' (essa coluna não existe). Filtre por fv.Descricao = 'Proposta'."
+  - "Fase de venda é de Clients (cliente convertido), não de PreLeads. Para etapa do lead use StatusPreLeads.Descricao."
+  - "Para ordenar as fases use Ordem (aqui a coluna chama-se 'Ordem', não 'NrOrdem')."
+
+queries_exemplo:
+  - pergunta: "Quantos clientes há em cada fase de venda?"
+    sql: "SELECT fv.Descricao AS fase, COUNT(*) AS total FROM Clients c LEFT JOIN FaseVendas fv ON fv.Id = c.FaseVendaID GROUP BY fv.Descricao ORDER BY total DESC"
+  - pergunta: "Liste as fases de venda na ordem do funil."
+    sql: "SELECT Descricao, Ordem FROM FaseVendas WHERE Ativo = 1 ORDER BY Ordem"

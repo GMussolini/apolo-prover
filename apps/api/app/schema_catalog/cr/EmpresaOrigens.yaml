@@ -1,0 +1,45 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: EmpresaOrigens
+base: cr
+linhas_aprox: 6
+tamanho_mb: 0.07
+chave_primaria: [Id]
+usado_por_dominios: [CR_DELIVERY]
+descricao: "Lookup das empresas origem (entidades jurídicas próprias de faturamento) usadas nos contratos. Cada contrato é faturado por uma EmpresaOrigem. Tabela pequena (poucas linhas)."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Identificador único da empresa origem (PK)."
+  - nome: Nome
+    tipo: nvarchar
+    nulo: false
+    descricao: "Nome da empresa origem (entidade de faturamento). O rótulo exibível fica em Nome (NÃO em 'Descricao')."
+  - nome: RegimeTributacao
+    tipo: int
+    nulo: false
+    descricao: "Código do regime de tributação da empresa origem (enum inteiro)."
+  - nome: IcAtivo
+    tipo: bit
+    nulo: false
+    descricao: "Flag de empresa origem ativa (bit)."
+
+relacionamentos:
+  []
+
+gotchas:
+  - "O rótulo é Nome (NÃO 'Descricao') — diferente dos lookups do CRM. Sempre filtre/exiba por eo.Nome."
+  - "Empresa origem = entidade de faturamento do contrato (Contratos.EmpresaOrigemId). NÃO confundir com Empresas (o cliente do delivery)."
+  - "Flag de ativo é IcAtivo (com 'Ic'), não 'IsAtivo' nem 'Ativo'."
+  - "Tabela de lookup pequena; o vínculo é Contratos.EmpresaOrigemId -> EmpresaOrigens.Id."
+
+queries_exemplo:
+  - pergunta: "Liste as empresas origem ativas"
+    sql: "SELECT eo.Nome AS empresa_origem FROM EmpresaOrigens eo WHERE eo.IcAtivo = 1 ORDER BY eo.Nome ASC"
+  - pergunta: "Quantos contratos ativos cada empresa origem fatura?"
+    sql: "SELECT eo.Nome AS empresa_origem, COUNT(*) AS qtd_contratos FROM EmpresaOrigens eo LEFT JOIN Contratos ct ON ct.EmpresaOrigemId = eo.Id AND ct.IsAtivo = 1 GROUP BY eo.Nome ORDER BY qtd_contratos DESC"
+  - pergunta: "Valor total de contratos por empresa origem"
+    sql: "SELECT eo.Nome AS empresa_origem, SUM(ct.Valor) AS valor_total FROM Contratos ct LEFT JOIN EmpresaOrigens eo ON eo.Id = ct.EmpresaOrigemId GROUP BY eo.Nome ORDER BY valor_total DESC"

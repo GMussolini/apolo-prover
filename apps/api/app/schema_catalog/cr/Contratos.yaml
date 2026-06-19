@@ -1,0 +1,107 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: Contratos
+base: cr
+linhas_aprox: 153
+tamanho_mb: 0.13
+chave_primaria: [Id]
+usado_por_dominios: [CR_DELIVERY]
+descricao: "Contratos do delivery que vinculam Colaborador, Cliente (Empresa) e Centro de Custo. Define o valor financeiro, vigência (DataInicio/DataEncerramento), empresa origem de faturamento e gestão; é o elo entre uma alocação e o cliente."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Identificador único do contrato (PK)."
+  - nome: EmpresaId
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.Empresas
+    descricao: "FK para o cliente do delivery (Empresas). É por aqui que a alocação descobre em qual cliente o colaborador está."
+  - nome: Objeto
+    tipo: varchar
+    nulo: false
+    descricao: "Objeto/descrição resumida do contrato (o que está sendo contratado)."
+  - nome: Obs
+    tipo: nvarchar
+    nulo: false
+    descricao: "Observações livres sobre o contrato."
+  - nome: Escopo
+    tipo: nvarchar
+    nulo: false
+    descricao: "Escopo detalhado do contrato."
+  - nome: Valor
+    tipo: money
+    nulo: false
+    descricao: "Valor financeiro do contrato (money). Este é o valor financeiro real — não confundir com ProjetoEmpresaColaboradores.Valor, que são horas."
+  - nome: ColaboradorId
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.Colaboradores
+    descricao: "FK para o colaborador principal vinculado ao contrato."
+  - nome: ComissaoFixa
+    tipo: money
+    nulo: false
+    descricao: "Valor de comissão fixa associada ao contrato."
+  - nome: ComissaoPercentual
+    tipo: money
+    nulo: false
+    descricao: "Percentual de comissão associado ao contrato."
+  - nome: CentroCustoId
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.CentroCustos
+    descricao: "FK para o centro de custo do contrato (CentroCustos.Nome)."
+  - nome: DataInicio
+    tipo: datetime2
+    nulo: false
+    descricao: "Data de início da vigência do contrato."
+  - nome: EmpresaOrigemId
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.EmpresaOrigens
+    descricao: "FK para a empresa origem (entidade de faturamento) do contrato — EmpresaOrigens.Nome."
+  - nome: IsAtivo
+    tipo: bit
+    nulo: false
+    descricao: "Flag de contrato ativo (bit). Contrato vigente = IsAtivo = 1 ou DataEncerramento IS NULL / >= hoje."
+  - nome: DataEncerramento
+    tipo: datetime2
+    nulo: false
+    descricao: "Data de encerramento do contrato (vazia/futura = vigente). É a coluna de fim do CONTRATO — não confundir com DataFim da alocação."
+  - nome: Contratado
+    tipo: nvarchar
+    nulo: false
+    descricao: "Nome/identificação da parte contratada (texto livre)."
+  - nome: GestorId
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.Colaboradores
+    descricao: "FK para o colaborador gestor responsável pelo contrato."
+
+relacionamentos:
+  - "Contratos.EmpresaId -> dbo.Empresas"
+  - "Contratos.ColaboradorId -> dbo.Colaboradores"
+  - "Contratos.CentroCustoId -> dbo.CentroCustos"
+  - "Contratos.EmpresaOrigemId -> dbo.EmpresaOrigens"
+  - "Contratos.GestorId -> dbo.Colaboradores"
+
+gotchas:
+  - "Valor AQUI é financeiro (money). O 'Valor' de ProjetoEmpresaColaboradores são HORAS na maioria das linhas (e bimodal), não dinheiro."
+  - "Ao agregar valor de contrato a partir do domínio CR_DELIVERY (grão de ALOCAÇÃO, ~4 alocações por contrato), NUNCA use SUM(ct.Valor) cru — multiplica o valor pelo número de alocações (infla ~4x). Deduplique por ContratoId (subconsulta/CTE por ContratoId) ou agregue direto de Contratos."
+  - "Fim do contrato = DataEncerramento (não 'DataFim'). Vigência do contrato usa DataInicio/DataEncerramento; a alocação usa DataInicio/DataFim."
+  - "Contrato ativo = IsAtivo = 1 (ou DataEncerramento IS NULL / >= GETDATE()). A alocação ativa é a flag Ativo em ProjetoEmpresaColaboradores — colunas diferentes."
+  - "Cliente do delivery = EmpresaId -> Empresas.Nome. Empresas usa Nome (não Descricao)."
+  - "EmpresaOrigemId -> EmpresaOrigens.Nome (entidade de faturamento) e CentroCustoId -> CentroCustos.Nome: ambos os lookups usam Nome, não Descricao."
+  - "Há 2 FKs para Colaboradores: ColaboradorId (principal) e GestorId (gestor do contrato)."
+
+queries_exemplo:
+  - pergunta: "Contratos que encerram nos próximos 60 dias com o cliente e o valor"
+    sql: "SELECT emp.Nome AS empresa_cliente, ct.Id AS ContratoId, ct.DataInicio AS contrato_inicio, ct.DataEncerramento AS contrato_fim, ct.Valor AS contrato_valor FROM Contratos ct LEFT JOIN Empresas emp ON emp.Id = ct.EmpresaId WHERE ct.DataEncerramento BETWEEN GETDATE() AND DATEADD(day, 60, GETDATE()) ORDER BY ct.DataEncerramento ASC"
+  - pergunta: "Valor total de contratos ativos por cliente"
+    sql: "SELECT emp.Nome AS empresa_cliente, SUM(ct.Valor) AS valor_total, COUNT(*) AS qtd_contratos FROM Contratos ct LEFT JOIN Empresas emp ON emp.Id = ct.EmpresaId WHERE ct.IsAtivo = 1 GROUP BY emp.Nome ORDER BY valor_total DESC"
+  - pergunta: "Contratos ativos por centro de custo e empresa origem"
+    sql: "SELECT cc.Nome AS centro_custo, eo.Nome AS empresa_origem, COUNT(*) AS qtd_contratos, SUM(ct.Valor) AS valor_total FROM Contratos ct LEFT JOIN CentroCustos cc ON cc.Id = ct.CentroCustoId LEFT JOIN EmpresaOrigens eo ON eo.Id = ct.EmpresaOrigemId WHERE ct.IsAtivo = 1 GROUP BY cc.Nome, eo.Nome ORDER BY valor_total DESC"
+  - pergunta: "Contratos vigentes (sem data de encerramento) do cliente Acme"
+    sql: "SELECT ct.Id AS ContratoId, emp.Nome AS empresa_cliente, ct.Valor AS contrato_valor, ct.DataInicio AS contrato_inicio FROM Contratos ct LEFT JOIN Empresas emp ON emp.Id = ct.EmpresaId WHERE emp.Nome LIKE '%Acme%' AND (ct.DataEncerramento IS NULL OR ct.DataEncerramento >= GETDATE()) ORDER BY ct.DataInicio DESC"

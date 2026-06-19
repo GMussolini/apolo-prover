@@ -1,0 +1,54 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: FeedbackPassoIa
+base: crm
+linhas_aprox: 0
+tamanho_mb: 0.0
+chave_primaria: [Id]
+usado_por_dominios: [CRM_COORDENADOR_IA]
+descricao: "Cada linha é o feedback 👍/👎 que o vendedor deu sobre um passo decidido/executado pelo Coordenador Comercial IA. Liga-se ao passo por PassoId e serve de sinal de aprendizado/qualidade para a IA. Tabela ainda vazia em prod (0 linhas), sistema implantado sem uso."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Identificador único do feedback (PK)."
+  - nome: PassoId
+    tipo: uniqueidentifier
+    nulo: false
+    descricao: "FK lógica para o passo avaliado (PassosCadenciaIa.Id). É a coluna de ligação com o passo."
+  - nome: UsuarioId
+    tipo: nvarchar
+    nulo: false
+    descricao: "Id do vendedor que deu o feedback, casa com AspNetUsers.Id. (Nota: o vendedor dono do caso vem de CasosCadenciaIa.UsuarioVendedorId; este é quem registrou o feedback.)"
+  - nome: Avaliacao
+    tipo: bit
+    nulo: false
+    descricao: "Avaliação do vendedor sobre o passo (bit): 1 = 👍 útil, 0 = 👎 não útil. É esta a coluna do feedback — NÃO existe 'Util'."
+  - nome: ObservacaoCurta
+    tipo: nvarchar
+    nulo: false
+    descricao: "Observação textual curta deixada pelo vendedor junto da avaliação."
+  - nome: CriadoEm
+    tipo: datetime2
+    nulo: false
+    descricao: "Data/hora em que o feedback foi registrado."
+
+relacionamentos:
+  []
+
+gotchas:
+  - "Ligação com o passo é por `PassoId` -> PassosCadenciaIa.Id (LEFT JOIN, pois nem todo passo tem feedback)."
+  - "A avaliação 👍/👎 está em `Avaliacao` (bit: 1 = útil, 0 = não útil). NÃO existe coluna 'Util'."
+  - "Observação do feedback fica em `ObservacaoCurta` (não confundir com PassosCadenciaIa.ObservacaoVendedor)."
+  - "Tabela vazia em prod (0 linhas); consultas retornam vazio até haver uso. Sem feedback = passo sem linha aqui (Avaliacao IS NULL após o LEFT JOIN)."
+  - "`UsuarioId` é quem deu o feedback; o vendedor dono do caso vem de CasosCadenciaIa.UsuarioVendedorId — não assuma que são sempre o mesmo."
+
+queries_exemplo:
+  - pergunta: "Taxa de aceitação 👍/👎 por agente origem (apenas passos com feedback)"
+    sql: "SELECT p.AgenteOrigem, SUM(CASE WHEN f.Avaliacao = 1 THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(*), 0) AS taxa_util_pct, COUNT(*) AS total_feedbacks FROM FeedbackPassoIa f INNER JOIN PassosCadenciaIa p ON p.Id = f.PassoId GROUP BY p.AgenteOrigem ORDER BY taxa_util_pct DESC"
+  - pergunta: "Passos com feedback negativo (👎) por vendedor dono do caso"
+    sql: "SELECT u.Email AS vendedor_email, COUNT(*) AS feedbacks_negativos FROM FeedbackPassoIa f INNER JOIN PassosCadenciaIa p ON p.Id = f.PassoId INNER JOIN CasosCadenciaIa c ON c.Id = p.CasoCadenciaIaId LEFT JOIN AspNetUsers u ON u.Id = c.UsuarioVendedorId WHERE f.Avaliacao = 0 GROUP BY u.Email ORDER BY feedbacks_negativos DESC"
+  - pergunta: "Últimos feedbacks negativos com a observação e a razão da decisão da IA"
+    sql: "SELECT TOP 50 f.CriadoEm, f.ObservacaoCurta, p.AgenteOrigem, p.RazaoDecisaoIa, p.ConfidenceIa FROM FeedbackPassoIa f INNER JOIN PassosCadenciaIa p ON p.Id = f.PassoId WHERE f.Avaliacao = 0 ORDER BY f.CriadoEm DESC"

@@ -1,0 +1,138 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: AspNetUsers
+base: crm
+linhas_aprox: 44
+tamanho_mb: 0.07
+chave_primaria: [Id]
+usado_por_dominios: [CRM_COORDENADOR_IA, CRM_OPERACAO_VENDEDOR, CRM_PIPELINE]
+descricao: "Usuários do sistema (ASP.NET Identity) — na prática, os vendedores e demais operadores do CRM (~44). É o hub para quem é dono de cada lead/cliente: PreLeads.UsuarioId e Clients.UsuarioId apontam para cá. Vendedor é identificado por Email; nome humano em Nome."
+
+colunas:
+  - nome: Id
+    tipo: nvarchar
+    nulo: false
+    pk: true
+    descricao: "Chave primária do usuário; alvo de PreLeads.UsuarioId e Clients.UsuarioId."
+  - nome: UserName
+    tipo: nvarchar
+    nulo: false
+    descricao: "Login de acesso (identity). NÃO é o nome humano — para nome use Nome; para identificar o vendedor use Email."
+  - nome: NormalizedUserName
+    tipo: nvarchar
+    nulo: false
+    descricao: "UserName normalizado (uppercase) — uso interno do ASP.NET Identity."
+  - nome: Email
+    tipo: nvarchar
+    nulo: false
+    descricao: "E-mail do usuário. É o identificador canônico do vendedor no pipeline (vendedor_email)."
+  - nome: NormalizedEmail
+    tipo: nvarchar
+    nulo: false
+    descricao: "E-mail normalizado (uppercase) — uso interno do ASP.NET Identity."
+  - nome: EmailConfirmed
+    tipo: bit
+    nulo: false
+    descricao: "Flag de e-mail confirmado (Identity)."
+  - nome: PasswordHash
+    tipo: nvarchar
+    nulo: false
+    descricao: "Hash da senha (Identity). Não consultar."
+  - nome: SecurityStamp
+    tipo: nvarchar
+    nulo: false
+    descricao: "Carimbo de segurança do Identity — uso interno."
+  - nome: ConcurrencyStamp
+    tipo: nvarchar
+    nulo: false
+    descricao: "Carimbo de concorrência do Identity — uso interno."
+  - nome: PhoneNumber
+    tipo: nvarchar
+    nulo: false
+    descricao: "Telefone do usuário."
+  - nome: PhoneNumberConfirmed
+    tipo: bit
+    nulo: false
+    descricao: "Flag de telefone confirmado (Identity)."
+  - nome: TwoFactorEnabled
+    tipo: bit
+    nulo: false
+    descricao: "Flag de autenticação de dois fatores habilitada (Identity)."
+  - nome: LockoutEnd
+    tipo: datetimeoffset
+    nulo: false
+    descricao: "Fim do bloqueio de conta, se houver (Identity)."
+  - nome: LockoutEnabled
+    tipo: bit
+    nulo: false
+    descricao: "Flag indicando se a conta pode ser bloqueada (Identity)."
+  - nome: AccessFailedCount
+    tipo: int
+    nulo: false
+    descricao: "Contador de tentativas de login falhas (Identity)."
+  - nome: Ativo
+    tipo: bit
+    nulo: false
+    descricao: "Indica se o usuário/vendedor está ativo (1) ou desativado (0)."
+  - nome: CPF
+    tipo: nvarchar
+    nulo: false
+    descricao: "CPF do usuário."
+  - nome: DataAdmissao
+    tipo: datetime2
+    nulo: false
+    descricao: "Data de admissão do colaborador."
+  - nome: DataNascimento
+    tipo: datetime2
+    nulo: false
+    descricao: "Data de nascimento do usuário."
+  - nome: Nome
+    tipo: nvarchar
+    nulo: false
+    descricao: "Nome humano do usuário/vendedor (vendedor_nome). Use este para exibir o nome, não UserName."
+  - nome: URLPhoto
+    tipo: nvarchar
+    nulo: false
+    descricao: "URL da foto de perfil do usuário."
+  - nome: Senha
+    tipo: nvarchar
+    nulo: false
+    descricao: "Campo de senha (legado/app). Não consultar."
+  - nome: IcVendedor
+    tipo: bit
+    nulo: false
+    descricao: "Flag que marca o usuário como vendedor (1). Útil para filtrar só vendedores entre os usuários."
+  - nome: CaminhoAssinatura
+    tipo: nvarchar
+    nulo: false
+    descricao: "Caminho/arquivo da assinatura digital do usuário."
+  - nome: EquipeId
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.CadastroEquipes
+    descricao: "Equipe à qual o vendedor pertence (FK → CadastroEquipes)."
+  - nome: OrganizacaoId
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.Organizacoes
+    descricao: "Organização à qual o usuário pertence (FK → Organizacoes; multi-org)."
+  - nome: LinkedinUrl
+    tipo: nvarchar
+    nulo: false
+    descricao: "URL do LinkedIn do usuário."
+
+relacionamentos:
+  - "AspNetUsers.EquipeId -> dbo.CadastroEquipes"
+  - "AspNetUsers.OrganizacaoId -> dbo.Organizacoes"
+
+gotchas:
+  - "Vendedor é identificado por Email (vendedor_email). UserName é login, NÃO nome humano — o nome está em Nome (vendedor_nome)."
+  - "Tabela é o padrão ASP.NET Identity; muitas colunas (PasswordHash, SecurityStamp, *Normalized*, *Confirmed) são técnicas e não têm valor de negócio."
+  - "PreLeads.UsuarioId e Clients.UsuarioId apontam para AspNetUsers.Id (string), não para Email."
+  - "Nem todo usuário é vendedor — filtre IcVendedor = 1 (ou Ativo = 1) quando a pergunta for sobre vendedores."
+
+queries_exemplo:
+  - pergunta: "Liste os vendedores ativos com nome e e-mail."
+    sql: "SELECT Nome AS vendedor_nome, Email AS vendedor_email FROM AspNetUsers WHERE Ativo = 1 AND IcVendedor = 1 ORDER BY Nome"
+  - pergunta: "Quantos clientes cada vendedor (com nome) fechou?"
+    sql: "SELECT u.Nome AS vendedor_nome, u.Email AS vendedor_email, COUNT(c.Id) AS total FROM AspNetUsers u LEFT JOIN Clients c ON c.UsuarioId = u.Id GROUP BY u.Nome, u.Email ORDER BY total DESC"

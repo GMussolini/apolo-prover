@@ -1,0 +1,93 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: PreLeads
+base: crm
+linhas_aprox: 11601
+tamanho_mb: 8.51
+chave_primaria: [Id]
+usado_por_dominios: [CRM_PIPELINE]
+descricao: "Leads em prospecção (topo do funil comercial), antes de virarem cliente. Cada PreLead pertence a um vendedor (UsuarioId) e tem um status de funil (StatusPreLeadId). Quando convertido, gera um registro em Clients (Clients.PreLeadId aponta de volta)."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Chave primária do lead; referenciada por Clients.PreLeadId quando o lead converte."
+  - nome: UsuarioId
+    tipo: varchar
+    nulo: false
+    fk_para: dbo.AspNetUsers
+    descricao: "Vendedor responsável pelo lead (FK → AspNetUsers.Id). E-mail em AspNetUsers.Email, nome em AspNetUsers.Nome."
+  - nome: Telefone
+    tipo: nvarchar
+    nulo: false
+    descricao: "Telefone de contato do lead."
+  - nome: NomeContato
+    tipo: varchar
+    nulo: false
+    descricao: "Nome da pessoa de contato no lead. NÃO há coluna 'Nome' solta — o nome do contato é este."
+  - nome: EmailContato
+    tipo: varchar
+    nulo: false
+    descricao: "E-mail de contato do lead. NÃO há coluna 'Email' solta — o e-mail é este."
+  - nome: NomeEmpresa
+    tipo: nvarchar
+    nulo: false
+    descricao: "Nome da empresa do lead. É o 'nome' do lead no pipeline (equivale a Clients.RazaoSocial do lado cliente)."
+  - nome: Descricao
+    tipo: varchar
+    nulo: false
+    descricao: "Observação/anotação livre sobre o lead. NÃO é status — o status vem de StatusPreLeads via StatusPreLeadId."
+  - nome: StatusPreLeadId
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.StatusPreLeads
+    descricao: "Status atual do lead no funil (FK → StatusPreLeads). Texto legível em StatusPreLeads.Descricao (ex.: 'Em prospecção')."
+  - nome: DtRetorno
+    tipo: datetime2
+    nulo: false
+    descricao: "Data agendada para próximo retorno/follow-up com o lead."
+  - nome: DtCriacao
+    tipo: datetime2
+    nulo: false
+    descricao: "Data de cadastro do lead. É a 'data de criação'/entrada no funil — use para 'criado/parado há N dias' e filtros por ano."
+  - nome: Cargo
+    tipo: nvarchar
+    nulo: false
+    descricao: "Cargo da pessoa de contato no lead."
+  - nome: Linkedin
+    tipo: nvarchar
+    nulo: false
+    descricao: "URL do LinkedIn do contato."
+  - nome: LinkEmpresa
+    tipo: nvarchar
+    nulo: false
+    descricao: "Link/site da empresa do lead."
+  - nome: DtConversao
+    tipo: datetime2
+    nulo: false
+    descricao: "Data em que o lead foi convertido em cliente. Vazia/nula enquanto não converteu."
+  - nome: DtAtualizacao
+    tipo: datetime2
+    nulo: false
+    descricao: "Data da última atualização do registro."
+
+relacionamentos:
+  - "PreLeads.UsuarioId -> dbo.AspNetUsers"
+  - "PreLeads.StatusPreLeadId -> dbo.StatusPreLeads"
+
+gotchas:
+  - "PreLeads NÃO tem área de atuação — área só existe em Clients (AreaAtuacaoID). Nunca agrupe leads por área."
+  - "Nome da empresa = NomeEmpresa; contato = NomeContato; e-mail = EmailContato. NÃO existem colunas 'Nome' ou 'Email' soltas."
+  - "Status do lead vem do lookup StatusPreLeads.Descricao (via StatusPreLeadId), não da coluna Descricao (que é só anotação livre)."
+  - "Data de cadastro = DtCriacao; data de conversão = DtConversao. Use DtCriacao para 'parado/criado há N dias' (DtCriacao <= DATEADD(day,-N,GETDATE()))."
+  - "Lead vira cliente = vira registro em Clients (Clients.PreLeadId = PreLeads.Id). 'Vendeu/fechou' não é status aqui, é existir em Clients."
+
+queries_exemplo:
+  - pergunta: "Quantos leads o vendedor foliveira@provertec.com.br tem em prospecção?"
+    sql: "SELECT COUNT(*) AS total FROM PreLeads p LEFT JOIN StatusPreLeads s ON s.Id = p.StatusPreLeadId LEFT JOIN AspNetUsers u ON u.Id = p.UsuarioId WHERE u.Email = 'foliveira@provertec.com.br' AND s.Descricao = 'Em prospecção'"
+  - pergunta: "Leads parados há mais de 30 dias por vendedor"
+    sql: "SELECT u.Email AS vendedor_email, COUNT(*) AS total FROM PreLeads p LEFT JOIN AspNetUsers u ON u.Id = p.UsuarioId WHERE p.DtCriacao <= DATEADD(day,-30,GETDATE()) GROUP BY u.Email ORDER BY total DESC"
+  - pergunta: "Quantos leads foram cadastrados em 2025?"
+    sql: "SELECT COUNT(*) AS total FROM PreLeads p WHERE YEAR(p.DtCriacao) = 2025"

@@ -1,0 +1,39 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: TipoTarefas
+base: crm
+linhas_aprox: 9
+tamanho_mb: 0.07
+chave_primaria: [Id]
+usado_por_dominios: [CRM_OPERACAO_VENDEDOR]
+descricao: "Lookup dos tipos de tarefa do CRM. Valores reais (9): 'Fazer ligação (Telefone)', 'WhatsApp', 'Enviar Email', 'Evento', 'Primeira reunião', 'Reunião técnica', 'Reunião de proposta', 'Envio de proposta', 'Feedback'. Referenciada por Tarefas.TipoTarefaID."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Identificador do tipo de tarefa. Alvo de Tarefas.TipoTarefaID."
+  - nome: Descricao
+    tipo: nvarchar
+    nulo: false
+    descricao: "Rótulo legível do tipo de tarefa. Valores reais: 'Fazer ligação (Telefone)', 'WhatsApp', 'Enviar Email', 'Evento', 'Primeira reunião', 'Reunião técnica', 'Reunião de proposta', 'Envio de proposta', 'Feedback'. Use LIKE, não igualdade. É a coluna de nome — não existe 'Nome'."
+  - nome: Ativo
+    tipo: bit
+    nulo: false
+    descricao: "1 = tipo ativo/disponível para uso; 0 = desativado."
+
+relacionamentos:
+  []
+
+gotchas:
+  - "O rótulo legível é a coluna `Descricao` — NÃO existe coluna 'Nome'. Para mostrar/filtrar por tipo de tarefa use tt.Descricao."
+  - "Valores reais (9): 'Fazer ligação (Telefone)', 'WhatsApp', 'Enviar Email', 'Evento', 'Primeira reunião', 'Reunião técnica', 'Reunião de proposta', 'Envio de proposta', 'Feedback'. NÃO existe 'Ligação'/'E-mail'/'Follow-up' exatos — use LIKE '%ligação%' / LIKE '%Email%'."
+  - "Tabela lookup pequena (~9 linhas). Sempre acessada via JOIN a partir de Tarefas.TipoTarefaID = TipoTarefas.Id."
+  - "`Ativo = 0` indica tipos descontinuados que ainda podem aparecer em tarefas antigas."
+
+queries_exemplo:
+  - pergunta: "Quais são os tipos de tarefa cadastrados?"
+    sql: "SELECT Descricao FROM TipoTarefas WHERE Ativo = 1 ORDER BY Descricao"
+  - pergunta: "Quantas tarefas existem por tipo?"
+    sql: "SELECT tt.Descricao AS tipo, COUNT(*) AS total FROM Tarefas t LEFT JOIN TipoTarefas tt ON tt.Id = t.TipoTarefaID GROUP BY tt.Descricao ORDER BY total DESC"

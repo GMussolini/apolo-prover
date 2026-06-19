@@ -1,0 +1,37 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: AreaAtuacaos
+base: crm
+linhas_aprox: 205
+tamanho_mb: 0.07
+chave_primaria: [Id]
+usado_por_dominios: [CRM_PIPELINE]
+descricao: "Tabela de domínio (lookup) com as áreas/segmentos de atuação dos clientes. Referenciada por Clients.AreaAtuacaoID. Caracteriza o cliente já convertido — leads (PreLeads) NÃO têm área de atuação."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Chave primária da área; alvo de Clients.AreaAtuacaoID."
+  - nome: Descricao
+    tipo: nvarchar
+    nulo: false
+    descricao: "Texto legível da área de atuação. É ESTE campo que aparece nas respostas/filtros — não há coluna 'Nome'."
+  - nome: Ativo
+    tipo: bit
+    nulo: false
+    descricao: "Indica se a área está ativa/disponível para seleção (1) ou desativada (0)."
+
+relacionamentos:
+  []
+
+gotchas:
+  - "O texto da área fica em Descricao, NÃO em 'Nome' (essa coluna não existe). Filtre por a.Descricao = 'texto'."
+  - "Área de atuação só se aplica a Clients (clientes convertidos). PreLeads não tem área — nunca agrupe leads por área."
+
+queries_exemplo:
+  - pergunta: "Quantos clientes existem por área de atuação?"
+    sql: "SELECT a.Descricao AS area, COUNT(*) AS total FROM Clients c LEFT JOIN AreaAtuacaos a ON a.Id = c.AreaAtuacaoID GROUP BY a.Descricao ORDER BY total DESC"
+  - pergunta: "Liste as áreas de atuação ativas."
+    sql: "SELECT Descricao FROM AreaAtuacaos WHERE Ativo = 1 ORDER BY Descricao"

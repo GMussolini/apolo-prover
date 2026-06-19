@@ -1,0 +1,38 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: MotivoDesligamento
+base: cr
+linhas_aprox: 5
+tamanho_mb: 0.07
+chave_primaria: [Id]
+usado_por_dominios: [CR_FOLHA_PESSOAS]
+descricao: "Tabela de domínio (lookup) com os motivos de desligamento de colaboradores. Referenciada por Colaboradores.MotivoDesligamentoId; quando preenchida, indica que o colaborador foi desligado."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Id (uniqueidentifier) do motivo de desligamento. Alvo de Colaboradores.MotivoDesligamentoId."
+  - nome: Descricao
+    tipo: varchar
+    nulo: false
+    descricao: "Texto do motivo de desligamento (ex.: 'Pedido de demissão', 'Demissão sem justa causa'). É o rótulo legível desta tabela."
+  - nome: Ativo
+    tipo: bit
+    nulo: false
+    descricao: "Flag indicando se o motivo está ativo/disponível para uso (1 = ativo)."
+
+relacionamentos:
+  []
+
+gotchas:
+  - "ATÍPICO: o rótulo legível aqui é `Descricao` (NÃO `Nome`). Cargos e Departamentos usam `Nome`, mas MotivoDesligamento usa `Descricao`."
+  - "Esta tabela é o lado 'um' da relação; a FK fica em Colaboradores.MotivoDesligamentoId. Colaborador com MotivoDesligamentoId NULL = ainda ativo (não desligado)."
+  - "Apenas ~5 linhas (lookup). Não agregue valores aqui; agregue colaboradores/folhas e agrupe por md.Descricao."
+
+queries_exemplo:
+  - pergunta: "Quais são os motivos de desligamento cadastrados?"
+    sql: "SELECT Descricao FROM MotivoDesligamento WHERE Ativo = 1 ORDER BY Descricao"
+  - pergunta: "Quantos colaboradores foram desligados por cada motivo?"
+    sql: "SELECT md.Descricao AS motivo, COUNT(*) AS qtd FROM Colaboradores col INNER JOIN MotivoDesligamento md ON md.Id = col.MotivoDesligamentoId GROUP BY md.Descricao ORDER BY qtd DESC"

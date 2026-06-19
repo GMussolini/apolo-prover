@@ -1,0 +1,122 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: ProjetoEmpresaColaboradores
+base: cr
+linhas_aprox: 598
+tamanho_mb: 0.32
+chave_primaria: [Id]
+usado_por_dominios: [CR_DELIVERY]
+descricao: "Tabela-mãe do delivery: cada linha é uma alocação de um colaborador em um contrato/cliente, com vigência (DataInicio/DataFim), horas mensais contratadas (Valor), custos e os responsáveis Delivery Manager e Tech Lead. O timesheet aponta para cá."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Identificador único da alocação (PK)."
+  - nome: ContratoId
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.Contratos
+    descricao: "FK para o contrato que ampara a alocação; via Contratos chega-se ao cliente, centro de custo e empresa origem."
+  - nome: ColaboradorId
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.Colaboradores
+    descricao: "FK para o colaborador alocado (o profissional que executa o trabalho no cliente)."
+  - nome: ColaboradorTechLeadId
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.Colaboradores
+    descricao: "FK para o colaborador que atua como Tech Lead desta alocação (aponta para Colaboradores, não para o alocado)."
+  - nome: ColaboradorDeliveryManagerId
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.Colaboradores
+    descricao: "FK para o colaborador que atua como Delivery Manager desta alocação (aponta para Colaboradores, não para o alocado)."
+  - nome: CustoTechLead
+    tipo: money
+    nulo: false
+    descricao: "Custo financeiro do Tech Lead atribuído a esta alocação."
+  - nome: CustoDeliveryManager
+    tipo: money
+    nulo: false
+    descricao: "Custo financeiro do Delivery Manager atribuído a esta alocação."
+  - nome: DataInicio
+    tipo: datetime2
+    nulo: false
+    descricao: "Data de início da vigência da alocação do colaborador no projeto/cliente."
+  - nome: DataFim
+    tipo: datetime2
+    nulo: false
+    descricao: "Data de fim da vigência da alocação. Tratar como 'sem fim definido / vigente' quando vazia/futura; o sinal canônico de vigência é DataInicio<=hoje E DataFim>=hoje."
+  - nome: Valor
+    tipo: money
+    nulo: false
+    descricao: "ATENÇÃO: BIMODAL. Na MAIORIA das linhas representa HORAS mensais contratadas na alocação (capacidade prevista, tipicamente 0-250), exposto como HorasContratadas no domínio. PORÉM ~15 linhas guardam um VALOR FINANCEIRO (R$) que coincide com Contratos.Valor (valores acima de ~500 provavelmente são financeiros). NÃO somar cegamente. O valor financeiro do contrato fica em Contratos.Valor."
+  - nome: Custo
+    tipo: money
+    nulo: false
+    descricao: "Custo mensal do colaborador na alocação (custo da hora/capacidade)."
+  - nome: Ativo
+    tipo: bit
+    nulo: false
+    descricao: "Flag de alocação ativa (bit). Existe, mas a vigência canônica é dada por DataInicio/DataFim; prefira as datas."
+  - nome: ICValorFechado
+    tipo: bit
+    nulo: false
+    descricao: "Flag interna: indica se o valor (horas) do colaborador está fechado/travado para edição."
+  - nome: ICValorTechLeadFechado
+    tipo: bit
+    nulo: false
+    descricao: "Flag interna: indica se o valor do Tech Lead está fechado/travado."
+  - nome: ICParadorCustoTL
+    tipo: bit
+    nulo: false
+    descricao: "Flag interna de controle de custo do Tech Lead (parador de custo)."
+  - nome: FlagValorAcordado
+    tipo: bit
+    nulo: false
+    descricao: "Flag que indica se há um valor acordado específico para esta alocação."
+  - nome: ValorAcordado
+    tipo: money
+    nulo: false
+    descricao: "Valor acordado específico da alocação, quando FlagValorAcordado está marcado."
+  - nome: DataFimTechLead
+    tipo: datetime2
+    nulo: false
+    descricao: "Data de fim da participação do Tech Lead nesta alocação."
+  - nome: ObservacaoRelatorio
+    tipo: nvarchar
+    nulo: false
+    descricao: "Texto livre de observação exibido em relatórios da alocação."
+  - nome: DescontoRelatorio
+    tipo: nvarchar
+    nulo: false
+    descricao: "Texto/valor de desconto aplicado em relatórios da alocação."
+
+relacionamentos:
+  - "ProjetoEmpresaColaboradores.ContratoId -> dbo.Contratos"
+  - "ProjetoEmpresaColaboradores.ColaboradorId -> dbo.Colaboradores"
+  - "ProjetoEmpresaColaboradores.ColaboradorTechLeadId -> dbo.Colaboradores"
+  - "ProjetoEmpresaColaboradores.ColaboradorDeliveryManagerId -> dbo.Colaboradores"
+
+gotchas:
+  - "Valor é BIMODAL: na maioria das linhas são HORAS mensais contratadas (alias HorasContratadas), mas ~15 linhas guardam um VALOR FINANCEIRO (R$) que bate com Contratos.Valor (acima de ~500 provavelmente é financeiro). NÃO faça SUM(Valor) cego — filtre (ex.: Valor <= 500) ou avise. Para valor financeiro do contrato use Contratos.Valor."
+  - "Custo (money) = custo mensal do colaborador na alocação; CustoTechLead e CustoDeliveryManager = custos do TL/DM. Use para custo/margem do delivery — NUNCA use Valor (que são horas) como custo."
+  - "O domínio CR_DELIVERY está no GRÃO DE ALOCAÇÃO (~4 alocações por contrato). Não some Contratos.Valor neste grão sem deduplicar por ContratoId, senão infla ~4x."
+  - "Há 3 FKs para Colaboradores: ColaboradorId (alocado), ColaboradorDeliveryManagerId (DM) e ColaboradorTechLeadId (TL) — no SQL canônico viram 3 JOINs/aliases distintos (col, dm, tl)."
+  - "Vigência da ALOCAÇÃO usa DataInicio/DataFim; a vigência do CONTRATO usa Contratos.DataInicio/DataEncerramento — não confundir os pares."
+  - "Vigência canônica = pec.DataInicio <= GETDATE() AND (pec.DataFim IS NULL OR pec.DataFim >= GETDATE()). A flag Ativo existe mas as datas são o sinal preferencial."
+  - "Cliente do delivery vem via ContratoId -> Contratos.EmpresaId -> Empresas.Nome (esta tabela não tem coluna de cliente direta)."
+  - "Centro de custo e empresa origem só aparecem via Contratos (CentroCustoId / EmpresaOrigemId), não nesta tabela."
+
+queries_exemplo:
+  - pergunta: "Quem está alocado no cliente Acme hoje?"
+    sql: "SELECT col.NomeCompleto AS colaborador, col.Email AS colaborador_email, dm.NomeCompleto AS delivery_manager, tl.NomeCompleto AS tech_lead, pec.DataInicio, pec.DataFim FROM ProjetoEmpresaColaboradores pec LEFT JOIN Colaboradores col ON col.Id = pec.ColaboradorId LEFT JOIN Colaboradores dm ON dm.Id = pec.ColaboradorDeliveryManagerId LEFT JOIN Colaboradores tl ON tl.Id = pec.ColaboradorTechLeadId LEFT JOIN Contratos ct ON ct.Id = pec.ContratoId LEFT JOIN Empresas emp ON emp.Id = ct.EmpresaId WHERE emp.Nome LIKE '%Acme%' AND pec.DataInicio <= GETDATE() AND (pec.DataFim IS NULL OR pec.DataFim >= GETDATE()) ORDER BY col.NomeCompleto ASC"
+  - pergunta: "Total de horas mensais contratadas por Delivery Manager nas alocações vigentes"
+    sql: "SELECT dm.NomeCompleto AS delivery_manager, SUM(pec.Valor) AS total_horas, COUNT(*) AS qtd_alocacoes FROM ProjetoEmpresaColaboradores pec LEFT JOIN Colaboradores dm ON dm.Id = pec.ColaboradorDeliveryManagerId WHERE pec.DataInicio <= GETDATE() AND (pec.DataFim IS NULL OR pec.DataFim >= GETDATE()) GROUP BY dm.NomeCompleto ORDER BY total_horas DESC"
+  - pergunta: "Alocações ativas com Tech Lead definido, mostrando colaborador e cliente"
+    sql: "SELECT col.NomeCompleto AS colaborador, tl.NomeCompleto AS tech_lead, emp.Nome AS empresa_cliente, pec.Valor AS horas_contratadas, pec.DataInicio FROM ProjetoEmpresaColaboradores pec LEFT JOIN Colaboradores col ON col.Id = pec.ColaboradorId LEFT JOIN Colaboradores tl ON tl.Id = pec.ColaboradorTechLeadId LEFT JOIN Contratos ct ON ct.Id = pec.ContratoId LEFT JOIN Empresas emp ON emp.Id = ct.EmpresaId WHERE pec.Ativo = 1 AND (pec.DataFim IS NULL OR pec.DataFim >= GETDATE()) ORDER BY emp.Nome ASC, col.NomeCompleto ASC"
+  - pergunta: "Horas contratadas por cliente nas alocações vigentes"
+    sql: "SELECT emp.Nome AS empresa_cliente, SUM(pec.Valor) AS total_horas, COUNT(*) AS qtd_alocacoes FROM ProjetoEmpresaColaboradores pec LEFT JOIN Contratos ct ON ct.Id = pec.ContratoId LEFT JOIN Empresas emp ON emp.Id = ct.EmpresaId WHERE pec.DataInicio <= GETDATE() AND (pec.DataFim IS NULL OR pec.DataFim >= GETDATE()) GROUP BY emp.Nome ORDER BY total_horas DESC"

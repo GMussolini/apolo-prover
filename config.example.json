@@ -1,0 +1,41 @@
+{
+  "jwt_secret": "GERAR_64_CHARS_RANDOM_NA_PRIMEIRA_EXECUCAO",
+  "jwt_access_expires_minutes": 60,
+  "jwt_refresh_expires_days": 7,
+
+  "anthropic_api_key": "<PREENCHER>",
+  "openai_api_key": "<PREENCHER>",
+
+  "model_classificador": "claude-sonnet-4-6",
+  "model_sql_generator": "claude-sonnet-4-6",
+  "model_response_text": "claude-haiku-4-5",
+  "model_response_voice": "claude-haiku-4-5",
+  "model_realtime_voice": "gpt-4o-realtime-preview-2025-06-03",
+  "voice_default": "alloy",
+
+  "crm_conn": "Driver={ODBC Driver 18 for SQL Server};Server=tcp:<HOST>,1433;Database=<DB_CRM>;Uid=<USER>;Pwd=<SENHA>;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30",
+  "cr_conn":  "Driver={ODBC Driver 18 for SQL Server};Server=tcp:<HOST>,1433;Database=<DB_CR>;Uid=<USER>;Pwd=<SENHA>;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30",
+  "postgres_conn": "postgresql://<USER>:<SENHA>@<HOST>:5432/<DB>?sslmode=require",
+
+  "cors_origins": ["http://localhost:3000", "https://apolo-prover.vercel.app"],
+
+  "rate_limit_perguntas_por_minuto": 60,
+  "rate_limit_perguntas_por_dia": 1000,
+  "rate_limit_voz_minutos_por_dia": 30,
+  "rate_limit_logins_por_hora_por_ip": 10,
+  "voz_timeout_sessao_minutos": 10,
+
+  "sql_query_timeout_seconds": 30,
+  "max_linhas_amostra": 100,
+  "max_linhas_dados_retornados": 500,
+
+  "usuarios_iniciais": [
+    {
+      "email": "<EMAIL_ADMIN>",
+      "nome": "<NOME>",
+      "senha": "TROCAR_NO_PRIMEIRO_LOGIN",
+      "permissoes": "coordenador,financeiro,rh,delivery",
+      "is_admin": true
+    }
+  ]
+}

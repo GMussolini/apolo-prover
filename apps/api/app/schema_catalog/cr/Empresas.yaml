@@ -1,0 +1,74 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: Empresas
+base: cr
+linhas_aprox: 130
+tamanho_mb: 0.07
+chave_primaria: [Id]
+usado_por_dominios: [CR_DELIVERY, CR_FLUXO_CAIXA]
+descricao: "Cadastro de empresas clientes da Prover (delivery/alocação). No fluxo de caixa é a contraparte pagadora das contas a receber (join via ContasAReceber.EmpresaId)."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Identificador único da empresa."
+  - nome: CodigoProjeto
+    tipo: nvarchar
+    nulo: false
+    descricao: "Código de projeto associado à empresa cliente."
+  - nome: Nome
+    tipo: varchar
+    nulo: false
+    descricao: "Nome fantasia/comercial da empresa. É o rótulo usado como favorecido/empresa_cliente no ramo receber do domínio."
+  - nome: RazaoSocial
+    tipo: varchar
+    nulo: false
+    descricao: "Razão social (nome jurídico) da empresa."
+  - nome: CNPJ
+    tipo: varchar
+    nulo: false
+    descricao: "CNPJ da empresa."
+  - nome: Telefone
+    tipo: varchar
+    nulo: false
+    descricao: "Telefone de contato da empresa."
+  - nome: IncricaoEstadual
+    tipo: varchar
+    nulo: false
+    descricao: "Inscrição estadual da empresa (nome da coluna grafado 'Incricao')."
+  - nome: IncricaoMunicipal
+    tipo: varchar
+    nulo: false
+    descricao: "Inscrição municipal da empresa (nome da coluna grafado 'Incricao')."
+  - nome: DataIncio
+    tipo: date
+    nulo: false
+    descricao: "Data de início do relacionamento/contrato com a empresa (nome da coluna grafado 'Incio')."
+  - nome: IsCliente
+    tipo: bit
+    nulo: false
+    descricao: "Flag: 1 = empresa é cliente da Prover, 0 = não cliente."
+  - nome: Observacao
+    tipo: varchar
+    nulo: false
+    descricao: "Observação livre sobre a empresa."
+  - nome: ICGeraRelatorioComValor
+    tipo: bit
+    nulo: false
+    descricao: "Flag: 1 = gerar relatório exibindo valores para esta empresa."
+
+relacionamentos:
+  []
+
+gotchas:
+  - "O rótulo da empresa é `Nome` (nome fantasia) — diferente de Categorias, que usa `Descricao`. Use `RazaoSocial` quando precisar do nome jurídico."
+  - "Há grafias com typo no schema real: `IncricaoEstadual`, `IncricaoMunicipal` (sem o 's' de 'Inscricao') e `DataIncio` (sem o 'i' de 'Inicio'). Use exatamente esses nomes."
+  - "É a contraparte do ramo receber: ContasAReceber.EmpresaId -> Empresas.Id, trazendo Empresas.Nome como favorecido. Não tem relação com o ramo pagar."
+
+queries_exemplo:
+  - pergunta: "Listar as empresas clientes ativas"
+    sql: "SELECT Nome, RazaoSocial, CNPJ FROM Empresas WHERE IsCliente = 1 ORDER BY Nome"
+  - pergunta: "Total a receber por empresa cliente em 2026"
+    sql: "SELECT emp.Nome AS empresa_cliente, ROUND(SUM(COALESCE(cr.ValorBoleto, cr.ValorNota)), 2) AS total FROM ContasAReceber cr LEFT JOIN Empresas emp ON emp.Id = cr.EmpresaId WHERE cr.NrAno = 2026 GROUP BY emp.Nome ORDER BY total DESC"

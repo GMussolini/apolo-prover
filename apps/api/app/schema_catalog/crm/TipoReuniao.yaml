@@ -1,0 +1,39 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: TipoReuniao
+base: crm
+linhas_aprox: 2
+tamanho_mb: 0.07
+chave_primaria: [Id]
+usado_por_dominios: [CRM_OPERACAO_VENDEDOR]
+descricao: "Lookup dos tipos de reunião comercial. ATENÇÃO: Reunioes.TipoReuniaoId NÃO é populado, então o subtipo da reunião é SEMPRE NULL na prática; os exemplos 'Comercial'/'Apresentação' não casam com dados. Para categorizar reuniões use Reunioes.Status."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Identificador do tipo de reunião. Alvo de Reunioes.TipoReuniaoId."
+  - nome: Descricao
+    tipo: nvarchar
+    nulo: false
+    descricao: "Rótulo legível do tipo de reunião (ex.: 'Comercial', 'Apresentação'). É a coluna de nome — não existe 'Nome'."
+  - nome: Ativo
+    tipo: bit
+    nulo: false
+    descricao: "1 = tipo ativo/disponível para uso; 0 = desativado."
+
+relacionamentos:
+  []
+
+gotchas:
+  - "O rótulo legível é a coluna `Descricao` — NÃO existe coluna 'Nome'. Para mostrar/filtrar por tipo de reunião use tr.Descricao."
+  - "LACUNA: Reunioes.TipoReuniaoId não é populado — agrupar/filtrar reuniões por subtipo retorna sempre NULL (1475 reuniões, 0 com tipo). 'Comercial'/'Apresentação' não existem nos dados. Categorize reuniões por Reunioes.Status."
+  - "Lookup minúsculo (~2 linhas). Acessado via JOIN a partir de Reunioes.TipoReuniaoId = TipoReuniao.Id."
+  - "Atenção ao singular: a tabela chama-se `TipoReuniao` (não 'TiposReuniao')."
+
+queries_exemplo:
+  - pergunta: "Quais tipos de reunião existem?"
+    sql: "SELECT Descricao FROM TipoReuniao WHERE Ativo = 1 ORDER BY Descricao"
+  - pergunta: "Quantas reuniões por tipo neste ano?"
+    sql: "SELECT tr.Descricao AS tipo, COUNT(*) AS total FROM Reunioes r LEFT JOIN TipoReuniao tr ON tr.Id = r.TipoReuniaoId WHERE r.DataInicioAgendada >= '2026-01-01' GROUP BY tr.Descricao ORDER BY total DESC"

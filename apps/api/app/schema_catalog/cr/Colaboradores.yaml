@@ -1,0 +1,165 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: Colaboradores
+base: cr
+linhas_aprox: 290
+tamanho_mb: 0.26
+chave_primaria: [Id]
+usado_por_dominios: [CR_DELIVERY, CR_FLUXO_CAIXA, CR_FOLHA_PESSOAS]
+descricao: "Hub central de pessoas: cadastro de colaboradores/funcionários (perfil, cargo, contrato, papéis de gestão e dados de desligamento). É referenciada por dezenas de FKs em RH, Folha e Projetos."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Id (uniqueidentifier) do colaborador. Alvo das múltiplas FKs em Folhas, projetos, etc."
+  - nome: NomeCompleto
+    tipo: varchar
+    nulo: false
+    descricao: "Nome completo do colaborador. É o rótulo legível da pessoa (NÃO existe coluna 'Nome')."
+  - nome: Email
+    tipo: varchar
+    nulo: false
+    descricao: "E-mail corporativo do colaborador."
+  - nome: Documento
+    tipo: varchar
+    nulo: false
+    descricao: "Documento de identificação do colaborador (ex.: CPF)."
+  - nome: Telefone
+    tipo: varchar
+    nulo: false
+    descricao: "Telefone de contato do colaborador."
+  - nome: Genero
+    tipo: varchar
+    nulo: false
+    descricao: "Gênero do colaborador."
+  - nome: Ativo
+    tipo: bit
+    nulo: false
+    descricao: "Flag de colaborador ativo (1 = ativo, 0 = inativo/desligado). Junto com MotivoDesligamentoId define se está desligado."
+  - nome: ICvendedor
+    tipo: bit
+    nulo: false
+    descricao: "Flag: o colaborador atua como vendedor (1 = sim)."
+  - nome: ICDeliveryManager
+    tipo: bit
+    nulo: false
+    descricao: "Flag: o colaborador exerce papel de Delivery Manager (1 = sim)."
+  - nome: ICTechLead
+    tipo: bit
+    nulo: false
+    descricao: "Flag: o colaborador exerce papel de Tech Lead (1 = sim)."
+  - nome: D_Nascimento
+    tipo: datetime2
+    nulo: false
+    descricao: "Data de nascimento do colaborador."
+  - nome: Especializacao
+    tipo: varchar
+    nulo: false
+    descricao: "Especialização / área de expertise técnica do colaborador."
+  - nome: DataInicio
+    tipo: datetime2
+    nulo: false
+    descricao: "Data de início (admissão / entrada do colaborador)."
+  - nome: DataFim
+    tipo: datetime2
+    nulo: false
+    descricao: "Data de fim de vínculo do colaborador (quando aplicável)."
+  - nome: Data_Criacao_Email
+    tipo: datetime2
+    nulo: false
+    descricao: "Data de criação do e-mail corporativo."
+  - nome: CargoId
+    tipo: uniqueidentifier
+    nulo: false
+    descricao: "FK para Cargos.Id. Caminho para obter o cargo e, via Cargos.DepartamentoId, o departamento do colaborador."
+  - nome: Contrato
+    tipo: nvarchar
+    nulo: false
+    descricao: "Tipo/descrição do contrato do colaborador (ex.: CLT, PJ)."
+  - nome: ColaboradorId
+    tipo: uniqueidentifier
+    nulo: false
+    descricao: "Id de colaborador relacionado (auto-referência/integração com outro cadastro). Não é a PK desta tabela."
+  - nome: DtAvaliacaoInicial
+    tipo: datetime2
+    nulo: false
+    descricao: "Data da avaliação inicial do colaborador."
+  - nome: EmailCliente
+    tipo: varchar
+    nulo: false
+    descricao: "E-mail do cliente associado ao colaborador (contexto de alocação)."
+  - nome: NomeCliente
+    tipo: varchar
+    nulo: false
+    descricao: "Nome do cliente associado ao colaborador (contexto de alocação)."
+  - nome: Periodicidade
+    tipo: int
+    nulo: false
+    descricao: "Periodicidade (código inteiro) associada ao colaborador, ex.: ciclo de avaliação/pagamento."
+  - nome: CaminhoCurriculo
+    tipo: nvarchar
+    nulo: false
+    descricao: "Caminho/URL do arquivo de currículo do colaborador."
+  - nome: DtUltimaVenda
+    tipo: datetime
+    nulo: false
+    descricao: "Data da última venda atribuída ao colaborador (relevante para vendedores)."
+  - nome: TipoAlocacao
+    tipo: int
+    nulo: false
+    descricao: "Tipo de alocação do colaborador (código inteiro). Significado dos códigos não documentado no catálogo."
+  - nome: MotivoDesligamentoId
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.MotivoDesligamento
+    descricao: "FK para MotivoDesligamento.Id. Preenchido = colaborador desligado; NULL = ainda ativo."
+  - nome: ObservacoesDesligamento
+    tipo: nvarchar
+    nulo: false
+    descricao: "Texto livre com observações sobre o desligamento."
+  - nome: DataDesligamento
+    tipo: date
+    nulo: false
+    descricao: "Data em que o colaborador foi desligado (quando aplicável)."
+  - nome: IcGestao
+    tipo: bit
+    nulo: false
+    descricao: "Flag: o colaborador exerce papel de gestão (1 = sim)."
+  - nome: IcEnviaEmailFinanceiro
+    tipo: bit
+    nulo: false
+    descricao: "Flag de controle: o colaborador recebe e-mails financeiros (1 = sim)."
+  - nome: ICContratoCorreto
+    tipo: bit
+    nulo: false
+    descricao: "Flag de qualidade de cadastro: contrato marcado como correto (1 = sim)."
+  - nome: ResponsavelTicket
+    tipo: char
+    nulo: false
+    descricao: "Indicador de responsável por ticket (flag/código de uma posição)."
+  - nome: IcRecrutador
+    tipo: bit
+    nulo: false
+    descricao: "Flag: o colaborador atua como recrutador (1 = sim)."
+
+relacionamentos:
+  - "Colaboradores.MotivoDesligamentoId -> dbo.MotivoDesligamento"
+
+gotchas:
+  - "Nome da pessoa é `NomeCompleto` (NÃO existe coluna 'Nome'). Para filtrar por nome use NomeCompleto LIKE '%texto%'."
+  - "Departamento NÃO está aqui: derive via CargoId -> Cargos.Id e Cargos.DepartamentoId -> Departamentos.Id. Não há DepartamentoId em Colaboradores."
+  - "Colaborador 'desligado' = MotivoDesligamentoId IS NOT NULL OU Ativo = 0; o rótulo do motivo está em MotivoDesligamento.Descricao."
+  - "Há vários flags de papel (ICDeliveryManager, ICTechLead, ICvendedor, IcGestao, IcRecrutador) que indicam função, distintos das FKs de gestão em Folhas. Em Folhas, delivery manager/tech lead são FKs separadas (ColaboradorDeliveryManagerId/ColaboradorTechLeadId), não estes flags."
+  - "A coluna ColaboradorId desta tabela NÃO é a PK (a PK é Id) — é uma referência a outro cadastro; cuidado para não confundir nos JOINs."
+
+queries_exemplo:
+  - pergunta: "Quantos colaboradores ativos existem?"
+    sql: "SELECT COUNT(*) AS qtd FROM Colaboradores WHERE Ativo = 1 AND MotivoDesligamentoId IS NULL"
+  - pergunta: "Colaboradores desligados e seus motivos"
+    sql: "SELECT col.NomeCompleto AS colaborador, md.Descricao AS motivo, col.DataDesligamento FROM Colaboradores col INNER JOIN MotivoDesligamento md ON md.Id = col.MotivoDesligamentoId ORDER BY col.DataDesligamento DESC"
+  - pergunta: "Quantos colaboradores por departamento?"
+    sql: "SELECT dep.Nome AS departamento, COUNT(*) AS qtd FROM Colaboradores col INNER JOIN Cargos cargo ON cargo.Id = col.CargoId INNER JOIN Departamentos dep ON dep.Id = cargo.DepartamentoId WHERE col.Ativo = 1 GROUP BY dep.Nome ORDER BY qtd DESC"
+  - pergunta: "Quais colaboradores são Tech Leads?"
+    sql: "SELECT NomeCompleto, Email FROM Colaboradores WHERE ICTechLead = 1 AND Ativo = 1 ORDER BY NomeCompleto"

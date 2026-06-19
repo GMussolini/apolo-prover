@@ -1,0 +1,55 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: Cargos
+base: cr
+linhas_aprox: 8
+tamanho_mb: 0.07
+chave_primaria: [Id]
+usado_por_dominios: [CR_FOLHA_PESSOAS]
+descricao: "Tabela de domínio (lookup) com os cargos da empresa. Liga colaborador a departamento: cada Cargo pertence a um Departamento (DepartamentoId), e Colaboradores.CargoId aponta para cá."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Id (uniqueidentifier) do cargo. Alvo de Colaboradores.CargoId."
+  - nome: DepartamentoId
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.Departamentos
+    descricao: "FK para o departamento ao qual o cargo pertence. É o caminho para derivar o departamento de um colaborador."
+  - nome: Nome
+    tipo: varchar
+    nulo: false
+    descricao: "Nome do cargo (ex.: 'Desenvolvedor', 'Tech Lead'). É o rótulo legível desta tabela."
+  - nome: Ativo
+    tipo: bit
+    nulo: false
+    descricao: "Flag indicando se o cargo está ativo (1 = ativo)."
+  - nome: IdEmpresaSistema
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.EmpresasSistema
+    descricao: "FK para a empresa do sistema (multi-empresa). Na prática há uma única empresa configurada."
+  - nome: IdFilial
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.Filiais
+    descricao: "FK para a filial à qual o cargo pertence."
+
+relacionamentos:
+  - "Cargos.DepartamentoId -> dbo.Departamentos"
+  - "Cargos.IdEmpresaSistema -> dbo.EmpresasSistema"
+  - "Cargos.IdFilial -> dbo.Filiais"
+
+gotchas:
+  - "O rótulo legível é `Nome` (NÃO 'Descricao'). Atenção: MotivoDesligamento usa 'Descricao', mas Cargos e Departamentos usam `Nome`."
+  - "Cargos é o elo entre Colaboradores e Departamentos: Colaboradores.CargoId -> Cargos.Id, e Cargos.DepartamentoId -> Departamentos.Id. Não existe DepartamentoId em Colaboradores."
+  - "Lookup muito pequeno (~8 linhas). Use só para rotular/agrupar; nunca agregue valores aqui."
+
+queries_exemplo:
+  - pergunta: "Quais cargos existem e em que departamento?"
+    sql: "SELECT cargo.Nome AS cargo, dep.Nome AS departamento FROM Cargos cargo INNER JOIN Departamentos dep ON dep.Id = cargo.DepartamentoId WHERE cargo.Ativo = 1 ORDER BY dep.Nome, cargo.Nome"
+  - pergunta: "Quantos colaboradores por cargo?"
+    sql: "SELECT cargo.Nome AS cargo, COUNT(*) AS qtd FROM Colaboradores col INNER JOIN Cargos cargo ON cargo.Id = col.CargoId GROUP BY cargo.Nome ORDER BY qtd DESC"

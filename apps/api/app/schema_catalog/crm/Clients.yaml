@@ -1,0 +1,223 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: Clients
+base: crm
+linhas_aprox: 1815
+tamanho_mb: 1.32
+chave_primaria: [Id]
+usado_por_dominios: [CRM_OPERACAO_VENDEDOR, CRM_PIPELINE]
+descricao: "Clientes fechados/convertidos — a entidade comercial do CRM (não há tabela 'Empresas'). Cada Client originou-se de um PreLead (PreLeadId) e pertence a um vendedor (UsuarioId). Tem fase de venda, motivo de conclusão e área de atuação. Existir em Clients = 'vendeu/fechou'."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Chave primária do cliente."
+  - nome: RazaoSocial
+    tipo: nvarchar
+    nulo: false
+    descricao: "Razão social do cliente. É o 'nome' do cliente no pipeline (equivale a PreLeads.NomeEmpresa do lado lead)."
+  - nome: CNPJ
+    tipo: nvarchar
+    nulo: false
+    descricao: "CNPJ da empresa cliente."
+  - nome: Ativo
+    tipo: bit
+    nulo: false
+    descricao: "Indica se o cadastro do cliente está ativo (1) ou inativo (0)."
+  - nome: Creationdate
+    tipo: datetime2
+    nulo: false
+    descricao: "Data de cadastro do cliente (momento da conversão lead→cliente). Use para 'fechou em 2025', taxa de conversão e filtros por período."
+  - nome: AreaAtuacaoID
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.AreaAtuacaos
+    descricao: "Área de atuação do cliente (FK → AreaAtuacaos). Texto legível em AreaAtuacaos.Descricao. Só existe para clientes (leads não têm área)."
+  - nome: B2bID
+    tipo: bit
+    nulo: false
+    descricao: "Indicador de cliente B2B (flag)."
+  - nome: Bairro
+    tipo: nvarchar
+    nulo: false
+    descricao: "Bairro do endereço do cliente."
+  - nome: Cep
+    tipo: nvarchar
+    nulo: false
+    descricao: "CEP do endereço do cliente."
+  - nome: Cidade
+    tipo: nvarchar
+    nulo: false
+    descricao: "Cidade do cliente."
+  - nome: Complemento
+    tipo: nvarchar
+    nulo: false
+    descricao: "Complemento do endereço."
+  - nome: DetalhesDoMotivo
+    tipo: nvarchar
+    nulo: false
+    descricao: "Texto livre detalhando o motivo de conclusão da venda (complementa MotivoConclusaoVendaID)."
+  - nome: Email
+    tipo: nvarchar
+    nulo: false
+    descricao: "E-mail do cliente. É a coluna de e-mail (do lado lead o equivalente é EmailContato)."
+  - nome: Endereco
+    tipo: nvarchar
+    nulo: false
+    descricao: "Logradouro/endereço do cliente."
+  - nome: Estado
+    tipo: nvarchar
+    nulo: false
+    descricao: "Estado/UF do cliente."
+  - nome: FaseAtivo
+    tipo: bit
+    nulo: false
+    descricao: "Flag indicando se o cliente está em uma fase de venda ativa."
+  - nome: FaseVendaID
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.FaseVendas
+    descricao: "Fase de venda atual do cliente (FK → FaseVendas). Texto legível em FaseVendas.Descricao (ex.: 'Proposta', 'Negociação')."
+  - nome: Informacoes
+    tipo: nvarchar
+    nulo: false
+    descricao: "Informações/observações livres sobre o cliente."
+  - nome: MotivoConclusaoVendaID
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.MotivoConclusaoVendas
+    descricao: "Motivo de conclusão (ganho/perda) da venda (FK → MotivoConclusaoVendas). Texto legível em MotivoConclusaoVendas.Descricao."
+  - nome: NameClient
+    tipo: nvarchar
+    nulo: false
+    descricao: "Nome fantasia/nome do cliente (alternativa a RazaoSocial). No pipeline o 'nome' canônico é RazaoSocial."
+  - nome: Pais
+    tipo: nvarchar
+    nulo: false
+    descricao: "País do cliente."
+  - nome: Telefone
+    tipo: nvarchar
+    nulo: false
+    descricao: "Telefone do cliente."
+  - nome: UsuarioId
+    tipo: varchar
+    nulo: false
+    fk_para: dbo.AspNetUsers
+    descricao: "Vendedor responsável pelo cliente (FK → AspNetUsers.Id). E-mail em AspNetUsers.Email, nome em AspNetUsers.Nome. 'Vendedor que mais vendeu' = COUNT de clientes por este vendedor."
+  - nome: DtAssinaturaContrato
+    tipo: datetime2
+    nulo: false
+    descricao: "Data de assinatura do contrato com o cliente."
+  - nome: DtEncerramentoContrato
+    tipo: datetime2
+    nulo: false
+    descricao: "Data de encerramento/término do contrato."
+  - nome: ObsContrato
+    tipo: nvarchar
+    nulo: false
+    descricao: "Observações sobre o contrato."
+  - nome: StatusClient
+    tipo: int
+    nulo: false
+    descricao: "Status do cliente codificado como inteiro (enum interno do app — não é texto legível)."
+  - nome: DeliveryManager
+    tipo: nvarchar
+    nulo: false
+    descricao: "Responsável pela entrega/delivery do cliente (nome/identificação)."
+  - nome: CanalDeContato
+    tipo: int
+    nulo: false
+    descricao: "Canal de aquisição/contato codificado como inteiro (enum interno do app)."
+  - nome: WhoIndicated
+    tipo: varchar
+    nulo: false
+    descricao: "Quem indicou o cliente (origem por indicação)."
+  - nome: LinkMeeting
+    tipo: nvarchar
+    nulo: false
+    descricao: "Link da reunião associada ao cliente (Meet/Teams)."
+  - nome: Arquivos
+    tipo: nvarchar
+    nulo: false
+    descricao: "Campo de levantamento técnico/diagnóstico do cliente referente a Arquivos (texto livre)."
+  - nome: BI
+    tipo: nvarchar
+    nulo: false
+    descricao: "Campo de levantamento técnico do cliente referente a BI/relatórios (texto livre)."
+  - nome: Backup
+    tipo: nvarchar
+    nulo: false
+    descricao: "Campo de levantamento técnico do cliente referente a Backup (texto livre)."
+  - nome: Banco
+    tipo: nvarchar
+    nulo: false
+    descricao: "Campo de levantamento técnico do cliente referente a Banco de dados (texto livre)."
+  - nome: Desenvolvimento
+    tipo: nvarchar
+    nulo: false
+    descricao: "Campo de levantamento técnico do cliente referente a Desenvolvimento (texto livre)."
+  - nome: Erp
+    tipo: nvarchar
+    nulo: false
+    descricao: "Campo de levantamento técnico do cliente referente a ERP (texto livre)."
+  - nome: Infraestrutura
+    tipo: nvarchar
+    nulo: false
+    descricao: "Campo de levantamento técnico do cliente referente a Infraestrutura (texto livre)."
+  - nome: Integracoes
+    tipo: nvarchar
+    nulo: false
+    descricao: "Campo de levantamento técnico do cliente referente a Integrações (texto livre)."
+  - nome: IcProdutivo
+    tipo: bit
+    nulo: false
+    descricao: "Flag indicando se o cliente está produtivo (em operação ativa)."
+  - nome: Comentario
+    tipo: nvarchar
+    nulo: false
+    descricao: "Comentário livre sobre o cliente."
+  - nome: DocumentoID
+    tipo: uniqueidentifier
+    nulo: false
+    descricao: "Id de documento associado ao cliente (ex.: proposta/contrato em DocumentosClientes)."
+  - nome: DtProdutivo
+    tipo: datetime2
+    nulo: false
+    descricao: "Data em que o cliente passou a produtivo (entrou em operação)."
+  - nome: IcFavorito
+    tipo: bit
+    nulo: false
+    descricao: "Flag de cliente marcado como favorito."
+  - nome: PreLeadId
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.PreLeads
+    descricao: "Lead de origem do cliente (FK → PreLeads.Id). Liga o cliente de volta ao registro de prospecção que o gerou."
+
+relacionamentos:
+  - "Clients.AreaAtuacaoID -> dbo.AreaAtuacaos"
+  - "Clients.FaseVendaID -> dbo.FaseVendas"
+  - "Clients.MotivoConclusaoVendaID -> dbo.MotivoConclusaoVendas"
+  - "Clients.UsuarioId -> dbo.AspNetUsers"
+  - "Clients.PreLeadId -> dbo.PreLeads"
+
+gotchas:
+  - "Clients = oportunidades NO FUNIL (1.815), NÃO 'clientes fechados'. A maioria está em Prospecção/Primeira Reunião (fase_venda). Contar Clients = contar 'clientes', mas NÃO 'vendas/fechados'."
+  - "FECHADO/GANHO/VENDEU = MotivoConclusaoVendas.Descricao = 'Contrato Assinado' (só ~32 all-time). 'Vendedor que mais vendeu' = COUNT desses por vendedor (UsuarioId → AspNetUsers.Email). NUNCA conte toda a tabela como vendas."
+  - "DtAssinaturaContrato está DEFAULTADA em todas as 1.815 linhas (não-nula mas placeholder) — NÃO serve como data/sinal de fechamento. Não há data de fechamento confiável; recorte por ano via Creationdate (aproximação)."
+  - "Nome do cliente = RazaoSocial (também há NameClient); e-mail = Email; data = Creationdate (momento da conversão). NÃO há 'NomeEmpresa'/'EmailContato' aqui — esses são de PreLeads."
+  - "Fase/motivo/área vêm de lookups via Descricao: FaseVendas.Descricao, MotivoConclusaoVendas.Descricao, AreaAtuacaos.Descricao (nunca 'Nome')."
+  - "StatusClient e CanalDeContato são inteiros (enum interno do app), não texto — não confundir com os lookups de Descricao."
+  - "Área de atuação só existe aqui (AreaAtuacaoID), nunca em PreLeads. Voltar ao lead de origem usa PreLeadId."
+
+queries_exemplo:
+  - pergunta: "Quantos clientes cada vendedor fechou em 2025?"
+    sql: "SELECT u.Email AS vendedor_email, COUNT(*) AS total FROM Clients c LEFT JOIN AspNetUsers u ON u.Id = c.UsuarioId WHERE YEAR(c.Creationdate) = 2025 GROUP BY u.Email ORDER BY total DESC"
+  - pergunta: "Clientes em fase Proposta há mais de 30 dias"
+    sql: "SELECT c.RazaoSocial AS nome, c.Email AS email, u.Email AS vendedor_email FROM Clients c LEFT JOIN FaseVendas fv ON fv.Id = c.FaseVendaID LEFT JOIN AspNetUsers u ON u.Id = c.UsuarioId WHERE fv.Descricao = 'Proposta' AND c.Creationdate <= DATEADD(day,-30,GETDATE()) ORDER BY c.Creationdate ASC"
+  - pergunta: "Quantos clientes por área de atuação?"
+    sql: "SELECT a.Descricao AS area, COUNT(*) AS total FROM Clients c LEFT JOIN AreaAtuacaos a ON a.Id = c.AreaAtuacaoID GROUP BY a.Descricao ORDER BY total DESC"
+  - pergunta: "Clientes ganhos por motivo de conclusão"
+    sql: "SELECT mc.Descricao AS motivo, COUNT(*) AS total FROM Clients c LEFT JOIN MotivoConclusaoVendas mc ON mc.Id = c.MotivoConclusaoVendaID GROUP BY mc.Descricao ORDER BY total DESC"

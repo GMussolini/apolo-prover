@@ -1,0 +1,45 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: CentroCustos
+base: cr
+linhas_aprox: 4
+tamanho_mb: 0.07
+chave_primaria: [Id]
+usado_por_dominios: [CR_DELIVERY]
+descricao: "Lookup dos centros de custo usados para alocar financeiramente os contratos. Cada contrato aponta para um centro de custo. Tabela pequena (poucas linhas)."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Identificador único do centro de custo (PK)."
+  - nome: Nome
+    tipo: varchar
+    nulo: false
+    descricao: "Nome do centro de custo. O rótulo exibível fica em Nome (NÃO em 'Descricao')."
+  - nome: Observacao
+    tipo: varchar
+    nulo: false
+    descricao: "Observações livres sobre o centro de custo."
+  - nome: Ativo
+    tipo: bit
+    nulo: false
+    descricao: "Flag de centro de custo ativo (bit)."
+
+relacionamentos:
+  []
+
+gotchas:
+  - "O rótulo é Nome (NÃO 'Descricao') — diferente dos lookups do CRM. Sempre filtre/exiba por cc.Nome."
+  - "Flag de ativo é Ativo (bit), sem prefixo 'Is'/'Ic'."
+  - "Vínculo via Contratos.CentroCustoId -> CentroCustos.Id; centro de custo NÃO está em ProjetoEmpresaColaboradores, só chega via Contratos."
+  - "Tabela de lookup pequena."
+
+queries_exemplo:
+  - pergunta: "Liste os centros de custo ativos"
+    sql: "SELECT cc.Nome AS centro_custo FROM CentroCustos cc WHERE cc.Ativo = 1 ORDER BY cc.Nome ASC"
+  - pergunta: "Valor total de contratos por centro de custo"
+    sql: "SELECT cc.Nome AS centro_custo, SUM(ct.Valor) AS valor_total, COUNT(*) AS qtd_contratos FROM Contratos ct LEFT JOIN CentroCustos cc ON cc.Id = ct.CentroCustoId GROUP BY cc.Nome ORDER BY valor_total DESC"
+  - pergunta: "Quantos colaboradores alocados vigentes existem por centro de custo?"
+    sql: "SELECT cc.Nome AS centro_custo, COUNT(*) AS qtd_alocacoes FROM ProjetoEmpresaColaboradores pec LEFT JOIN Contratos ct ON ct.Id = pec.ContratoId LEFT JOIN CentroCustos cc ON cc.Id = ct.CentroCustoId WHERE pec.DataInicio <= GETDATE() AND (pec.DataFim IS NULL OR pec.DataFim >= GETDATE()) GROUP BY cc.Nome ORDER BY qtd_alocacoes DESC"

@@ -1,0 +1,135 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: Folhas
+base: cr
+linhas_aprox: 5275
+tamanho_mb: 3.01
+chave_primaria: [Id]
+usado_por_dominios: [CR_FOLHA_PESSOAS]
+descricao: "Folha de pagamento / custo de pessoas: uma linha por colaborador x competência (mês/ano), associada a um projeto. Guarda valor faturado (VlTotalProj), custo efetivo (VlTotalCusto), horas e o contexto de gestão (delivery manager, tech lead). É a tabela-base do domínio CR_FOLHA_PESSOAS."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Id (uniqueidentifier) da linha de folha."
+  - nome: ColaboradorId
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.Colaboradores
+    descricao: "Colaborador DONO do holerite — a pessoa que de fato recebe nesta linha de folha. JOIN principal."
+  - nome: ColaboradorTechLeadId
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.Colaboradores
+    descricao: "Tech Lead associado à folha (contexto de gestão). NÃO é quem recebe o holerite; é outro Colaborador."
+  - nome: ColaboradorDeliveryManagerId
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.Colaboradores
+    descricao: "Delivery Manager associado à folha (contexto de gestão). NÃO é quem recebe o holerite; é outro Colaborador."
+  - nome: ColaboradorControladoId
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.Colaboradores
+    descricao: "Colaborador controlado associado à folha (contexto de gestão). NÃO recebe o holerite."
+  - nome: Referencia
+    tipo: datetime2
+    nulo: false
+    descricao: "Data completa de competência da folha (equivalente a NrAno+NrMes). Use comparadores >=, <=, BETWEEN para filtros temporais."
+  - nome: ProjetoId
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.ProjetoEmpresaColaboradores
+    descricao: "FK para a alocação projeto-empresa-colaborador a que esta folha se refere."
+  - nome: VlHoraCusto
+    tipo: money
+    nulo: false
+    descricao: "Valor de custo por hora do colaborador usado no cálculo da folha."
+  - nome: VlCustoDeliveryManager
+    tipo: money
+    nulo: false
+    descricao: "Parcela de custo atribuída ao Delivery Manager nesta folha."
+  - nome: VlCustoTechLead
+    tipo: money
+    nulo: false
+    descricao: "Parcela de custo atribuída ao Tech Lead nesta folha."
+  - nome: VlProjeto
+    tipo: money
+    nulo: false
+    descricao: "Valor do projeto associado à linha (componente de faturamento)."
+  - nome: QtdHoras
+    tipo: float
+    nulo: false
+    descricao: "Quantidade de horas trabalhadas/registradas na competência."
+  - nome: QtdHorasCobradas
+    tipo: float
+    nulo: false
+    descricao: "Quantidade de horas efetivamente cobradas/faturadas na competência."
+  - nome: VlTotalCusto
+    tipo: money
+    nulo: false
+    descricao: "Custo efetivo do colaborador (VlTotalCusto) = quanto a pessoa custa na competência. NÃO confundir com salário líquido. É o 'custo' no domínio CR_FOLHA_PESSOAS. Agregável com SUM/AVG."
+  - nome: VlTotalProj
+    tipo: money
+    nulo: false
+    descricao: "Faturamento/receita do projeto na competência (VlTotalProj) = receita que a pessoa gera, NÃO o salário dela. É o 'faturamento' no domínio CR_FOLHA_PESSOAS. Agregável com SUM/AVG. margem = VlTotalProj - VlTotalCusto."
+  - nome: ICVlProjFechado
+    tipo: bit
+    nulo: false
+    descricao: "Flag indicando se o valor de projeto/faturamento está fechado (1 = fechado)."
+  - nome: VlProjetoFechado
+    tipo: money
+    nulo: false
+    descricao: "Valor de projeto já fechado/consolidado para a competência."
+  - nome: TipoFolha
+    tipo: int
+    nulo: false
+    descricao: "Tipo/categoria da folha (código inteiro). Significado dos códigos não documentado no catálogo."
+  - nome: Observacao
+    tipo: nvarchar
+    nulo: false
+    descricao: "Texto livre de observações sobre a linha de folha."
+  - nome: ICCustoFechado
+    tipo: bit
+    nulo: false
+    descricao: "Flag indicando se o custo está fechado/consolidado (1 = fechado)."
+  - nome: DtGeracaoFolha
+    tipo: datetime
+    nulo: false
+    descricao: "Data em que a folha foi gerada (não confundir com a competência Referencia/NrMes/NrAno)."
+  - nome: NrAno
+    tipo: int
+    nulo: false
+    descricao: "Ano de competência da folha (ex.: 2026). Inteiro canônico para filtrar competência junto com NrMes."
+  - nome: NrMes
+    tipo: int
+    nulo: false
+    descricao: "Mês de competência da folha (1..12). Inteiro canônico para filtrar competência junto com NrAno."
+
+relacionamentos:
+  - "Folhas.ColaboradorId -> dbo.Colaboradores"
+  - "Folhas.ColaboradorTechLeadId -> dbo.Colaboradores"
+  - "Folhas.ColaboradorDeliveryManagerId -> dbo.Colaboradores"
+  - "Folhas.ColaboradorControladoId -> dbo.Colaboradores"
+  - "Folhas.ProjetoId -> dbo.ProjetoEmpresaColaboradores"
+
+gotchas:
+  - "Há 4 FKs para Colaboradores: o DONO do holerite (ColaboradorId), o Delivery Manager (ColaboradorDeliveryManagerId), o Tech Lead (ColaboradorTechLeadId) e o Controlado (ColaboradorControladoId). Cada um exige um JOIN/alias distinto (ex.: col, dm, tl). Só ColaboradorId recebe de fato; os demais são contexto de gestão."
+  - "Semântica de valores (CORRETA, NÃO use os rótulos enganosos SalarioBruto/SalarioLiquido): VlTotalProj = faturamento/receita do projeto na competência (a receita que a pessoa gera, NÃO o salário dela); VlTotalCusto = custo efetivo do colaborador (quanto a pessoa custa); margem = VlTotalProj - VlTotalCusto. 'Folha total / custo total do mês' = SUM(VlTotalCusto). Ao vivo em 2026 o faturamento (~5,06M) é ~1,83x o custo (~2,76M), o que confirma serem receita e custo, não bruto/líquido de salário."
+  - "GRANULARIDADE: há VÁRIAS linhas de Folhas por colaborador na MESMA competência (uma por ProjetoId/alocação). Ex.: mês 5/2026 = 126 linhas para 85 colaboradores distintos. Para valores POR PESSOA use sempre SUM(...) agrupado por colaborador; uma linha é uma parcela por projeto, não o total da pessoa."
+  - "TipoFolha (int) classifica o tipo/categoria da linha; o significado dos códigos não está documentado. Pode haver tipos que não são folha de pagamento padrão (provisão/ajuste/estorno); somas sem filtro de TipoFolha incluem todos os tipos. Use SELECT DISTINCT TipoFolha para descobrir os valores."
+  - "Competência vem dos inteiros NrMes (1..12) e NrAno; Referencia é a data completa equivalente. Não use DtGeracaoFolha como competência — é a data de geração da folha."
+  - "Departamento e cargo NÃO estão aqui: chegue via Colaboradores.CargoId -> Cargos -> Cargos.DepartamentoId -> Departamentos."
+  - "Nome do colaborador é Colaboradores.NomeCompleto (não 'Nome'); motivo de desligamento via Colaboradores.MotivoDesligamentoId -> MotivoDesligamento.Descricao."
+
+queries_exemplo:
+  - pergunta: "Qual o custo total da folha no mês 5 de 2026?"
+    sql: "SELECT SUM(f.VlTotalCusto) AS custo_total FROM Folhas f WHERE f.NrMes = 5 AND f.NrAno = 2026"
+  - pergunta: "Custo total da folha por departamento em 2026"
+    sql: "SELECT dep.Nome AS departamento, SUM(f.VlTotalCusto) AS custo_total FROM Folhas f INNER JOIN Colaboradores col ON col.Id = f.ColaboradorId LEFT JOIN Cargos cargo ON cargo.Id = col.CargoId LEFT JOIN Departamentos dep ON dep.Id = cargo.DepartamentoId WHERE f.NrAno = 2026 GROUP BY dep.Nome ORDER BY custo_total DESC"
+  - pergunta: "Top 10 colaboradores com maior valor faturado no mês 4 de 2026"
+    sql: "SELECT TOP 10 col.NomeCompleto AS colaborador, SUM(f.VlTotalProj) AS faturamento FROM Folhas f INNER JOIN Colaboradores col ON col.Id = f.ColaboradorId WHERE f.NrMes = 4 AND f.NrAno = 2026 GROUP BY col.NomeCompleto ORDER BY faturamento DESC"
+  - pergunta: "Custo de folha por delivery manager em 2026"
+    sql: "SELECT dm.NomeCompleto AS delivery_manager, SUM(f.VlTotalCusto) AS total FROM Folhas f LEFT JOIN Colaboradores dm ON dm.Id = f.ColaboradorDeliveryManagerId WHERE f.NrAno = 2026 GROUP BY dm.NomeCompleto ORDER BY total DESC"

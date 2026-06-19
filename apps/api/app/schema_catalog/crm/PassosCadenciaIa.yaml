@@ -1,0 +1,95 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: PassosCadenciaIa
+base: crm
+linhas_aprox: 39
+tamanho_mb: 0.07
+chave_primaria: [Id]
+usado_por_dominios: [CRM_COORDENADOR_IA]
+descricao: "Cada linha é um passo de cadência que o Coordenador Comercial IA decidiu e/ou executou dentro de um caso (CasosCadenciaIa). Registra a ação sugerida pela IA, o canal, datas de agendamento/execução, o resultado e a trilha de auditoria da decisão da IA (razão, confiança e agente origem)."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Identificador único do passo (PK). Referenciado por FeedbackPassoIa.PassoId."
+  - nome: CasoCadenciaIaId
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.CasosCadenciaIa
+    descricao: "FK para o caso de cadência (CasosCadenciaIa.Id) ao qual este passo pertence. Um caso tem vários passos."
+  - nome: Ordem
+    tipo: int
+    nulo: false
+    descricao: "Sequência/ordem do passo dentro do caso (1, 2, 3...). É esta a coluna de ordem do passo — NÃO existe 'NumeroPasso'."
+  - nome: Canal
+    tipo: int
+    nulo: false
+    descricao: "Canal escolhido pela IA para o passo, em INT (enum). Conceitualmente: telefone, email, linkedin, whatsapp. Valores numéricos do enum não documentados."
+  - nome: AcaoSugerida
+    tipo: nvarchar
+    nulo: false
+    descricao: "Descrição textual da ação que a IA sugeriu para este passo (ex.: ligar, enviar e-mail)."
+  - nome: MensagemSugerida
+    tipo: nvarchar
+    nulo: false
+    descricao: "Texto da mensagem/conteúdo que a IA sugeriu para a ação (corpo do e-mail/WhatsApp/script)."
+  - nome: DataPrevista
+    tipo: datetime2
+    nulo: false
+    descricao: "Data/hora em que o passo foi agendado pela IA (data prevista). É a data agendada — NÃO existe 'DataAgendada'."
+  - nome: ExecutadaEm
+    tipo: datetime2
+    nulo: false
+    descricao: "Data/hora em que o passo foi efetivamente executado. Passo pendente = ExecutadaEm IS NULL. É a data de execução — NÃO existe 'DataExecucao'."
+  - nome: Resultado
+    tipo: int
+    nulo: false
+    descricao: "Estado/desfecho do passo em INT (enum). 0 = pendente/sem resultado; demais valores = desfechos da execução. Valores do enum não documentados."
+  - nome: ObservacaoVendedor
+    tipo: nvarchar
+    nulo: false
+    descricao: "Observação livre deixada pelo vendedor sobre o passo (distinta do feedback estruturado em FeedbackPassoIa)."
+  - nome: CriadaPorIa
+    tipo: bit
+    nulo: false
+    descricao: "Flag bit: 1 = passo criado automaticamente pela IA; 0 = criado manualmente."
+  - nome: TarefaCrmId
+    tipo: uniqueidentifier
+    nulo: false
+    descricao: "Vínculo opcional com a tarefa do CRM gerada a partir deste passo."
+  - nome: RazaoDecisaoIa
+    tipo: nvarchar
+    nulo: false
+    descricao: "Texto auditável explicando por que a IA tomou a decisão deste passo (rationale da IA)."
+  - nome: ConfidenceIa
+    tipo: int
+    nulo: false
+    descricao: "Confiança da IA na decisão do passo, INT em escala 0-100 (NÃO decimal 0-1). Valores reais observados: 50, 75, 82. Baixa < 60, alta >= 80; NUNCA filtre < 0.6/< 1 (retorna 0 linhas). Para média use AVG(CAST(ConfidenceIa AS float))."
+  - nome: AgenteOrigem
+    tipo: nvarchar
+    nulo: false
+    descricao: "Nome do agente IA que originou o passo. Valores reais observados: 'CadenciaAgente', 'BackfillCarteiraService' (a lista pode crescer; use SELECT DISTINCT p.AgenteOrigem para descobrir)."
+
+relacionamentos:
+  - "PassosCadenciaIa.CasoCadenciaIaId -> dbo.CasosCadenciaIa"
+
+gotchas:
+  - "Ordem do passo = coluna `Ordem` (não existe 'NumeroPasso')."
+  - "Data agendada = `DataPrevista`; data de execução = `ExecutadaEm`. Não existem 'DataAgendada' nem 'DataExecucao'."
+  - "Passo pendente = `ExecutadaEm IS NULL`; executado = `ExecutadaEm IS NOT NULL`."
+  - "Granularidade é o passo: um caso (CasoCadenciaIaId) tem vários passos. Para contar casos use COUNT(DISTINCT CasoCadenciaIaId)."
+  - "`ConfidenceIa`, `Resultado` e `Canal` são INT; filtros por string não funcionam. `ConfidenceIa` é INT em escala 0-100 (NÃO decimal 0-1): baixa < 60, alta >= 80; nunca filtre < 0.6/< 1. `Resultado`: 0 = pendente, demais (ex. 5, 7) = desfechos. `Canal`: valores numéricos do enum não mapeados (ex. observado 2)."
+  - "Feedback 👍/👎 do vendedor NÃO está aqui — fica em FeedbackPassoIa (LEFT JOIN por FeedbackPassoIa.PassoId = PassosCadenciaIa.Id)."
+  - "O vendedor não está nesta tabela: vem via CasosCadenciaIa.UsuarioVendedorId -> AspNetUsers.Id."
+
+queries_exemplo:
+  - pergunta: "Quantos passos a IA gerou para o vendedor foliveira@provertec.com.br nos últimos 7 dias e qual a confiança média?"
+    sql: "SELECT COUNT(*) AS total_passos, AVG(CAST(p.ConfidenceIa AS float)) AS confidence_media FROM PassosCadenciaIa p INNER JOIN CasosCadenciaIa c ON c.Id = p.CasoCadenciaIaId LEFT JOIN AspNetUsers u ON u.Id = c.UsuarioVendedorId WHERE u.Email = 'foliveira@provertec.com.br' AND p.DataPrevista >= DATEADD(day, -7, GETDATE())"
+  - pergunta: "Liste os passos pendentes com confiança baixa da IA para revisão"
+    sql: "SELECT TOP 100 p.Id AS passo_id, p.CasoCadenciaIaId AS caso_id, u.Email AS vendedor_email, p.Canal, p.ConfidenceIa, p.RazaoDecisaoIa, p.DataPrevista FROM PassosCadenciaIa p INNER JOIN CasosCadenciaIa c ON c.Id = p.CasoCadenciaIaId LEFT JOIN AspNetUsers u ON u.Id = c.UsuarioVendedorId WHERE p.ExecutadaEm IS NULL AND p.ConfidenceIa < 60 ORDER BY p.ConfidenceIa ASC"
+  - pergunta: "Quantos passos cada agente origem gerou e qual a confiança média de cada um?"
+    sql: "SELECT p.AgenteOrigem, COUNT(*) AS total_passos, AVG(CAST(p.ConfidenceIa AS float)) AS confidence_media FROM PassosCadenciaIa p GROUP BY p.AgenteOrigem ORDER BY total_passos DESC"
+  - pergunta: "Passos com feedback negativo (👎) por vendedor"
+    sql: "SELECT u.Email AS vendedor_email, COUNT(*) AS passos_negativos FROM PassosCadenciaIa p INNER JOIN CasosCadenciaIa c ON c.Id = p.CasoCadenciaIaId LEFT JOIN AspNetUsers u ON u.Id = c.UsuarioVendedorId INNER JOIN FeedbackPassoIa f ON f.PassoId = p.Id WHERE f.Avaliacao = 0 GROUP BY u.Email ORDER BY passos_negativos DESC"

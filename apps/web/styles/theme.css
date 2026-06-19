@@ -1,0 +1,25 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap");
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0A0F1A; }
+::-webkit-scrollbar-thumb { background: #1D2A3C; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #566377; }
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+@keyframes vc-ripple {
+  0% { transform: scale(0.7); opacity: 0.4; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+.shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(31,143,227,0.15), transparent);
+  animation: shimmer 2.5s ease-in-out infinite;
+}

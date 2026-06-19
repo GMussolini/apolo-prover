@@ -1,0 +1,48 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: PessoaFavorecidos
+base: cr
+linhas_aprox: 3
+tamanho_mb: 0.07
+chave_primaria: [Id]
+usado_por_dominios: [CR_FLUXO_CAIXA]
+descricao: "Cadastro de favorecidos de pagamento com seus dados bancários (tabela pequena, ~3 linhas). Usada por LancamentoPagamentos como destinatário de transferências."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Identificador único do favorecido."
+  - nome: Nome
+    tipo: nvarchar
+    nulo: false
+    descricao: "Nome do favorecido (titular da conta de destino)."
+  - nome: Banco
+    tipo: nvarchar
+    nulo: false
+    descricao: "Banco da conta de destino do favorecido."
+  - nome: Agencia
+    tipo: nvarchar
+    nulo: false
+    descricao: "Agência bancária do favorecido."
+  - nome: Digito
+    tipo: int
+    nulo: false
+    descricao: "Dígito verificador da conta corrente."
+  - nome: ContaCorrente
+    tipo: nvarchar
+    nulo: false
+    descricao: "Número da conta corrente do favorecido."
+
+relacionamentos:
+  []
+
+gotchas:
+  - "CUIDADO: apesar do nome, o 'favorecido' do domínio CR_FLUXO_CAIXA NÃO sai daqui. No ramo pagar o favorecido é Colaboradores.NomeCompleto e no ramo receber é Empresas.Nome. Esta tabela só é referenciada por LancamentoPagamentos (fora do domínio)."
+  - "Tabela muito pequena (~3 linhas) — cadastro de dados bancários, não fonte de valores financeiros."
+  - "O rótulo do favorecido aqui é `Nome` (não 'Descricao')."
+
+queries_exemplo:
+  - pergunta: "Listar os favorecidos cadastrados e seus bancos"
+    sql: "SELECT Nome, Banco, Agencia, ContaCorrente FROM PessoaFavorecidos ORDER BY Nome"

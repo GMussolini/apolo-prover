@@ -1,0 +1,198 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: Reunioes
+base: crm
+linhas_aprox: 1429
+tamanho_mb: 6.52
+chave_primaria: [Id]
+usado_por_dominios: [CRM_OPERACAO_VENDEDOR]
+descricao: "Reuniões comerciais (Meet/Teams) dos vendedores com clientes, incluindo agenda, participantes, transcrição e análise de IA (resumo, sentimento, nota). Vinculada ao tipo via TipoReuniaoId e ao vendedor pelo OrganizadorEmail."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Identificador único da reunião."
+  - nome: ClientId
+    tipo: uniqueidentifier
+    nulo: false
+    descricao: "Id do cliente vinculado à reunião (Clients.Id). Sem FK declarada; nome da empresa vem de Clients.RazaoSocial."
+  - nome: Emails
+    tipo: nvarchar
+    nulo: false
+    descricao: "Lista de e-mails dos convidados/participantes (texto)."
+  - nome: Titulo
+    tipo: nvarchar
+    nulo: false
+    descricao: "Título da reunião. É a 'descricao' exposta pelo domínio para reuniões."
+  - nome: Descricao
+    tipo: nvarchar
+    nulo: false
+    descricao: "Descrição/pauta detalhada da reunião."
+  - nome: DataReuniao
+    tipo: date
+    nulo: false
+    descricao: "Data (apenas dia) da reunião. Para filtros use de preferência DataInicioAgendada (datetime completo)."
+  - nome: Hora
+    tipo: time
+    nulo: false
+    descricao: "Hora da reunião (complementa DataReuniao)."
+  - nome: TipoReuniaoId
+    tipo: uniqueidentifier
+    nulo: false
+    descricao: "FK lógica para o tipo da reunião (TipoReuniao.Id) — rótulo legível em TipoReuniao.Descricao."
+  - nome: Status
+    tipo: nvarchar
+    nulo: false
+    descricao: "Status textual da reunião. Valores reais: 'Realizada' (=realizada/concluída), 'Agendada', 'Cancelada'. NÃO existe 'Concluída'. Use para 'realizada'/'cancelada'."
+  - nome: ObsReuniao
+    tipo: nvarchar
+    nulo: false
+    descricao: "Observações livres sobre a reunião."
+  - nome: MeetingId
+    tipo: nvarchar
+    nulo: false
+    descricao: "Id externo do evento de reunião na plataforma (Meet/Teams)."
+  - nome: DataInicioAgendada
+    tipo: datetime2
+    nulo: false
+    descricao: "Data/hora de início agendada. Campo principal de agendamento — base de 'pendente'/'atrasada' e filtros por período."
+  - nome: DataFimAgendada
+    tipo: datetime2
+    nulo: false
+    descricao: "Data/hora de término AGENDADA. Nunca é nula — NÃO é sinal de conclusão. Reunião realizada vem de Status='Realizada', não de DataFimAgendada preenchida."
+  - nome: DuracaoMinutos
+    tipo: int
+    nulo: false
+    descricao: "Duração planejada/efetiva da reunião em minutos."
+  - nome: FoiCancelada
+    tipo: bit
+    nulo: false
+    descricao: "1 = reunião cancelada; 0 = não cancelada. Complementa o campo Status."
+  - nome: TranscriptId
+    tipo: nvarchar
+    nulo: false
+    descricao: "Id externo da transcrição gerada para a reunião."
+  - nome: TemTranscricao
+    tipo: bit
+    nulo: false
+    descricao: "1 = reunião possui transcrição; 0 = sem transcrição."
+  - nome: ConteudoTranscricao
+    tipo: nvarchar
+    nulo: false
+    descricao: "Texto integral da transcrição da reunião (pode ser grande)."
+  - nome: DataCriacaoTranscricao
+    tipo: datetime2
+    nulo: false
+    descricao: "Data/hora em que a transcrição foi criada."
+  - nome: OrganizadorNome
+    tipo: nvarchar
+    nulo: false
+    descricao: "Nome do organizador da reunião (geralmente o vendedor)."
+  - nome: OrganizadorEmail
+    tipo: nvarchar
+    nulo: false
+    descricao: "E-mail do organizador. Único elo com o vendedor: JOIN AspNetUsers.Email = OrganizadorEmail (não há FK direta)."
+  - nome: TotalParticipantes
+    tipo: int
+    nulo: false
+    descricao: "Quantidade de participantes da reunião."
+  - nome: DataProcessamento
+    tipo: datetime2
+    nulo: false
+    descricao: "Data/hora de processamento geral do registro da reunião."
+  - nome: UrlReuniao
+    tipo: nvarchar
+    nulo: false
+    descricao: "URL de acesso à reunião (link Meet/Teams)."
+  - nome: AchouLead
+    tipo: bit
+    nulo: false
+    descricao: "1 = IA identificou um lead/oportunidade na reunião; 0 = não."
+  - nome: DataInicioEfetiva
+    tipo: datetime2
+    nulo: false
+    descricao: "Data/hora real de início da reunião (efetiva, não a agendada)."
+  - nome: DataFimEfetiva
+    tipo: datetime2
+    nulo: false
+    descricao: "Data/hora real de término da reunião (efetiva)."
+  - nome: PromptIA
+    tipo: nvarchar
+    nulo: false
+    descricao: "Prompt enviado à IA para análise da reunião."
+  - nome: RespostaIA
+    tipo: nvarchar
+    nulo: false
+    descricao: "Resposta bruta retornada pela IA na análise da reunião."
+  - nome: ResumoIA
+    tipo: nvarchar
+    nulo: false
+    descricao: "Resumo da reunião gerado pela IA."
+  - nome: SentimentoGeral
+    tipo: nvarchar
+    nulo: false
+    descricao: "Sentimento geral da reunião classificado pela IA (ex.: positivo/neutro/negativo)."
+  - nome: NotaReuniao
+    tipo: int
+    nulo: false
+    descricao: "Nota/score da reunião atribuído pela IA (inteiro)."
+  - nome: StatusProcessamentoIA
+    tipo: nvarchar
+    nulo: false
+    descricao: "Status do processamento de IA (ex.: pendente, concluído, erro)."
+  - nome: DataProcessamentoIA
+    tipo: datetime2
+    nulo: false
+    descricao: "Data/hora em que a análise de IA foi processada."
+  - nome: ErroProcessamentoIA
+    tipo: nvarchar
+    nulo: false
+    descricao: "Mensagem de erro do processamento de IA, quando houver falha."
+  - nome: TokensUtilizados
+    tipo: int
+    nulo: false
+    descricao: "Tokens consumidos pela IA na análise da reunião."
+  - nome: ModeloIA
+    tipo: nvarchar
+    nulo: false
+    descricao: "Identificador do modelo de IA usado na análise."
+  - nome: VersaoPrompt
+    tipo: nvarchar
+    nulo: false
+    descricao: "Versão do prompt de IA aplicado."
+  - nome: OrganizadorEventoEmail
+    tipo: nvarchar
+    nulo: false
+    descricao: "E-mail do organizador do evento de calendário (pode diferir de OrganizadorEmail)."
+  - nome: DataCriacao
+    tipo: datetime2
+    nulo: false
+    descricao: "Data/hora de criação do registro da reunião."
+
+relacionamentos:
+  []
+
+gotchas:
+  - "Vendedor NÃO tem FK: o elo é AspNetUsers.Email = Reunioes.OrganizadorEmail. Não existe UsuarioID nesta tabela."
+  - "A 'descrição/título' da reunião exposta pelo domínio é `Titulo` (no CTE: r.Titulo AS descricao). Existe também uma coluna `Descricao` (pauta detalhada)."
+  - "Campo de agendamento é `DataInicioAgendada` / `DataFimAgendada` (datetime2). Há também DataReuniao (só date) e Data*Efetiva (horários reais) — não misturar."
+  - "Tipo da reunião é o lookup `TipoReuniao.Descricao` via TipoReuniaoId (singular 'TipoReuniao')."
+  - "'Realizada' = Status = 'Realizada' (valor real; NÃO existe 'Concluída'). 'Cancelada' = Status = 'Cancelada' (ou FoiCancelada = 1). 'Agendada' = Status = 'Agendada'. Valores reais ao vivo: Realizada(1212), Cancelada(65), Agendada(14)."
+  - "Subtipo via TipoReuniaoId/TipoReuniao.Descricao é SEMPRE NULL (não populado): não agrupe/filtre reuniões por subtipo — categorize por Status."
+  - "Reunião 'atrasada' = Status = 'Agendada' AND DataInicioAgendada < GETDATE(). NÃO use DataFimAgendada IS NULL (nunca é nula)."
+  - "Nome da empresa-cliente vem de Clients.RazaoSocial via ClientId (Clients NÃO tem 'Nome'); ClientId aqui não tem FK declarada no catálogo."
+  - "Participantes: a contagem fica em `TotalParticipantes` (não há tabela de participantes na whitelist do domínio)."
+
+queries_exemplo:
+  - pergunta: "Quantas reuniões foram realizadas neste mês?"
+    sql: "SELECT COUNT(*) AS total FROM Reunioes r WHERE r.Status = 'Realizada' AND r.DataInicioAgendada >= DATEADD(day,-30,GETDATE())"
+  - pergunta: "Top 10 vendedores por reuniões realizadas nos últimos 30 dias"
+    sql: "SELECT u.UserName AS vendedor, COUNT(*) AS total FROM Reunioes r LEFT JOIN AspNetUsers u ON u.Email = r.OrganizadorEmail WHERE r.Status = 'Realizada' AND r.DataInicioAgendada >= DATEADD(day,-30,GETDATE()) GROUP BY u.UserName ORDER BY total DESC"
+  - pergunta: "Distribuição de reuniões por status"
+    sql: "SELECT r.Status AS status, COUNT(*) AS total FROM Reunioes r GROUP BY r.Status ORDER BY total DESC"
+  - pergunta: "Reuniões com mais de 5 participantes do vendedor wsoares"
+    sql: "SELECT r.Titulo, r.DataInicioAgendada, r.TotalParticipantes, c.RazaoSocial AS cliente FROM Reunioes r LEFT JOIN AspNetUsers u ON u.Email = r.OrganizadorEmail LEFT JOIN Clients c ON c.Id = r.ClientId WHERE u.Email = 'wsoares@provertec.com.br' AND r.TotalParticipantes > 5 ORDER BY r.DataInicioAgendada DESC"
+  - pergunta: "Distribuição de reuniões por sentimento detectado pela IA"
+    sql: "SELECT r.SentimentoGeral AS sentimento, COUNT(*) AS total FROM Reunioes r WHERE r.TemTranscricao = 1 GROUP BY r.SentimentoGeral ORDER BY total DESC"

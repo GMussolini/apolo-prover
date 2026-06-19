@@ -1,0 +1,95 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: ContasAPagar
+base: cr
+linhas_aprox: 2172
+tamanho_mb: 2.39
+chave_primaria: [Id]
+usado_por_dominios: [CR_FLUXO_CAIXA]
+descricao: "Contas a pagar da Prover — saídas de caixa da folha mensal de colaboradores. Cada linha é o valor a pagar a um colaborador num período (mês/ano) de referência."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Identificador único da conta a pagar (uniqueidentifier; serializado como NVARCHAR(36) no domínio)."
+  - nome: ColaboradorId
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.Colaboradores
+    descricao: "FK para Colaboradores — o beneficiário/favorecido do pagamento. Join traz Colaboradores.NomeCompleto."
+  - nome: EmpresaOrigem
+    tipo: nvarchar
+    nulo: false
+    descricao: "Empresa de origem do pagamento, gravada como texto livre (não é FK para Empresas)."
+  - nome: Periodo
+    tipo: datetime2
+    nulo: false
+    descricao: "Período/competência da folha (mês/ano de referência). Usado como data de vencimento no domínio."
+  - nome: Pagamento
+    tipo: money
+    nulo: false
+    descricao: "Valor a pagar (money). É o valor-base de SUM/AVG no ramo 'pagar' do fluxo de caixa."
+  - nome: Status
+    tipo: nvarchar
+    nulo: false
+    descricao: "Status textual original da conta a pagar. Valores reais: 'Pago', 'Pendente', 'Faturado'. PODE divergir de DataProcesso (ex.: há contas 'Pendente' com DataProcesso preenchida)."
+  - nome: DataProcesso
+    tipo: datetime2
+    nulo: false
+    descricao: "Data efetiva de processamento/quitação do pagamento. IS NULL = ainda não paga (em aberto)."
+  - nome: Observacao
+    tipo: nvarchar
+    nulo: false
+    descricao: "Observação livre da conta a pagar."
+  - nome: DtGeracaoFolha
+    tipo: datetime
+    nulo: false
+    descricao: "Data em que a folha que originou este pagamento foi gerada."
+  - nome: NrAno
+    tipo: int
+    nulo: false
+    descricao: "Ano da folha de competência (duplicado de Periodo, prático para filtros rápidos)."
+  - nome: NrMes
+    tipo: int
+    nulo: false
+    descricao: "Mês da folha de competência (1..12; duplicado de Periodo)."
+  - nome: TipoFolha
+    tipo: int
+    nulo: false
+    descricao: "Código do tipo de folha que gerou o pagamento."
+  - nome: IcEmailEnviado
+    tipo: bit
+    nulo: false
+    descricao: "Flag: 1 quando o e-mail de comprovante/aviso já foi enviado."
+  - nome: DtEnvioEmail
+    tipo: datetime
+    nulo: false
+    descricao: "Data de envio do e-mail de comprovante/aviso."
+  - nome: CorpoEmail
+    tipo: nvarchar
+    nulo: false
+    descricao: "Conteúdo (corpo) do e-mail de comprovante/aviso enviado."
+
+relacionamentos:
+  - "ContasAPagar.ColaboradorId -> dbo.Colaboradores"
+
+gotchas:
+  - "Valor a pagar = coluna `Pagamento` (money) — NÃO existe coluna 'Valor' aqui."
+  - "Data de quitação = `DataProcesso`; `DataProcesso IS NULL` significa conta ainda em aberto. A competência fica em `Periodo` / `NrAno` + `NrMes`."
+  - "`Status` (valores reais: Pago / Pendente / Faturado) PODE divergir de `DataProcesso`: há ~4 contas 'Pendente' com DataProcesso preenchida. O domínio CR_FLUXO_CAIXA define pago/em-aberto por DataProcesso (data), não por Status."
+  - "`Periodo` é COMPETÊNCIA (mês/ano de referência), não vencimento contratual. Há registros-lixo de conversão: ~49 contas com Pagamento <= 0 (R$0) e linhas com NrAno=1; em somas/médias filtre Pagamento > 0 AND NrAno >= 2020."
+  - "NÃO há FK para Categorias — a categorização financeira vive em LancamentoPagamentos (fora do domínio CR_FLUXO_CAIXA), por isso o domínio emite categoria como NULL no ramo pagar."
+  - "Favorecido NÃO vem da tabela PessoaFavorecidos: no ramo pagar o favorecido é Colaboradores.NomeCompleto (via ColaboradorId)."
+  - "`EmpresaOrigem` é texto livre, não FK para Empresas."
+
+queries_exemplo:
+  - pergunta: "Qual o total a pagar (folha) no mês de janeiro de 2026?"
+    sql: "SELECT ROUND(SUM(Pagamento), 2) AS total_pagar FROM ContasAPagar WHERE NrAno = 2026 AND NrMes = 1"
+  - pergunta: "Quanto ainda está em aberto (não processado) no ano de 2026?"
+    sql: "SELECT ROUND(SUM(Pagamento), 2) AS total_em_aberto, COUNT(*) AS qtd FROM ContasAPagar WHERE NrAno = 2026 AND DataProcesso IS NULL"
+  - pergunta: "Top 10 colaboradores com maior valor a pagar acumulado em 2026"
+    sql: "SELECT TOP 10 col.NomeCompleto AS favorecido, ROUND(SUM(cp.Pagamento), 2) AS total FROM ContasAPagar cp LEFT JOIN Colaboradores col ON col.Id = cp.ColaboradorId WHERE cp.NrAno = 2026 GROUP BY col.NomeCompleto ORDER BY total DESC"
+  - pergunta: "Total pago por mês em 2026"
+    sql: "SELECT NrMes AS mes, ROUND(SUM(Pagamento), 2) AS total FROM ContasAPagar WHERE NrAno = 2026 AND DataProcesso IS NOT NULL GROUP BY NrMes ORDER BY NrMes"

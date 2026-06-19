@@ -1,0 +1,86 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: ClientContacts
+base: crm
+linhas_aprox: 1905
+tamanho_mb: 1.01
+chave_primaria: [Id]
+usado_por_dominios: [CRM_OPERACAO_VENDEDOR]
+descricao: "Contatos (pessoas) de cada cliente — interlocutores do vendedor dentro da empresa-cliente. Uma tarefa pode ser vinculada a um contato específico via Tarefas.ClientContactId."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Identificador do contato. Alvo de Tarefas.ClientContactId."
+  - nome: ClientID
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.Clients
+    descricao: "FK para o cliente (empresa) a que o contato pertence (Clients.Id)."
+  - nome: Name
+    tipo: nvarchar
+    nulo: false
+    descricao: "Nome do contato (pessoa). Coluna em INGLÊS — é 'Name', não 'Nome'."
+  - nome: Email
+    tipo: nvarchar
+    nulo: false
+    descricao: "E-mail do contato. Coluna em inglês 'Email'."
+  - nome: Telephone
+    tipo: nvarchar
+    nulo: false
+    descricao: "Telefone do contato. Coluna em inglês 'Telephone', não 'Telefone'."
+  - nome: JobCompanyClient
+    tipo: nvarchar
+    nulo: false
+    descricao: "Cargo/função do contato dentro da empresa-cliente."
+  - nome: Colaborador
+    tipo: bit
+    nulo: false
+    descricao: "1 = contato é colaborador interno (não cliente externo); 0 = contato do cliente."
+  - nome: Nascimento
+    tipo: datetime2
+    nulo: false
+    descricao: "Data de nascimento do contato."
+  - nome: Tags
+    tipo: nvarchar
+    nulo: false
+    descricao: "Etiquetas livres associadas ao contato (texto)."
+  - nome: Linkedin
+    tipo: nvarchar
+    nulo: false
+    descricao: "URL ou identificador do perfil de LinkedIn do contato."
+  - nome: DecisionLevel
+    tipo: int
+    nulo: false
+    descricao: "Nível de decisão do contato no processo de compra (código inteiro; quanto maior, mais decisor)."
+  - nome: Departamento
+    tipo: nvarchar
+    nulo: false
+    descricao: "Departamento/área do contato na empresa-cliente."
+  - nome: UltimoContato
+    tipo: datetime
+    nulo: false
+    descricao: "Data/hora do último contato registrado com esta pessoa."
+  - nome: PreferenciaContato
+    tipo: int
+    nulo: false
+    descricao: "Canal preferido de contato, como código inteiro (ex.: telefone, e-mail)."
+
+relacionamentos:
+  - "ClientContacts.ClientID -> dbo.Clients"
+
+gotchas:
+  - "Colunas de identidade estão em INGLÊS: use `Name`, `Email`, `Telephone` — NÃO 'Nome', 'Telefone'."
+  - "Não confundir com a empresa: o nome da EMPRESA-cliente fica em Clients.RazaoSocial; aqui `Name` é a PESSOA de contato."
+  - "JOIN canônico a partir de tarefas: ClientContacts cc ON cc.Id = Tarefas.ClientContactId (o alias é `cc` no domínio CRM_OPERACAO_VENDEDOR)."
+  - "`Colaborador = 1` marca contatos internos; filtre para isolar contatos de fato externos quando necessário."
+
+queries_exemplo:
+  - pergunta: "Quais contatos do cliente Prover não têm contato há mais de 90 dias?"
+    sql: "SELECT cc.Name, cc.Email, cc.UltimoContato FROM ClientContacts cc LEFT JOIN Clients c ON c.Id = cc.ClientID WHERE c.RazaoSocial LIKE '%Prover%' AND cc.UltimoContato < DATEADD(day,-90,GETDATE()) ORDER BY cc.UltimoContato"
+  - pergunta: "Liste os contatos decisores (DecisionLevel alto) por empresa"
+    sql: "SELECT c.RazaoSocial AS empresa, cc.Name AS contato, cc.JobCompanyClient AS cargo, cc.DecisionLevel FROM ClientContacts cc LEFT JOIN Clients c ON c.Id = cc.ClientID WHERE cc.Colaborador = 0 ORDER BY cc.DecisionLevel DESC"
+  - pergunta: "Quantos contatos cada cliente tem?"
+    sql: "SELECT c.RazaoSocial AS empresa, COUNT(*) AS qtd_contatos FROM ClientContacts cc LEFT JOIN Clients c ON c.Id = cc.ClientID GROUP BY c.RazaoSocial ORDER BY qtd_contatos DESC"

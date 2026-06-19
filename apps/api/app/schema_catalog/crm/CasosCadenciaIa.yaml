@@ -1,0 +1,107 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: CasosCadenciaIa
+base: crm
+linhas_aprox: 37
+tamanho_mb: 0.07
+chave_primaria: [Id]
+usado_por_dominios: [CRM_COORDENADOR_IA]
+descricao: "Cada linha é um caso de cadência do Coordenador Comercial IA — uma trilha de relacionamento que a IA conduz para um lead/entidade, sob responsabilidade de um vendedor. Mantém o estado atual do caso (status, fase, score, canal, tentativas) e a agenda da próxima ação. Um caso agrupa vários passos (PassosCadenciaIa)."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Identificador único do caso (PK). Referenciado por PassosCadenciaIa.CasoCadenciaIaId."
+  - nome: UsuarioVendedorId
+    tipo: nvarchar
+    nulo: false
+    descricao: "FK lógica do vendedor dono do caso, casa com AspNetUsers.Id (Email do vendedor vem por JOIN). É esta a coluna do vendedor — NÃO existe 'UsuarioId' aqui."
+  - nome: TipoEntidade
+    tipo: nvarchar
+    nulo: false
+    descricao: "Tipo da entidade-alvo da cadência (ex.: Lead, Cliente, Contato), discriminador do EntidadeId."
+  - nome: EntidadeId
+    tipo: uniqueidentifier
+    nulo: false
+    descricao: "Id da entidade-alvo (lead/cliente/contato) referenciada pelo caso, conforme TipoEntidade."
+  - nome: EmpresaClientId
+    tipo: uniqueidentifier
+    nulo: false
+    descricao: "Id da empresa/cliente associada ao caso."
+  - nome: ContatoAtualId
+    tipo: uniqueidentifier
+    nulo: false
+    descricao: "Id do contato atualmente em foco na cadência (pode mudar ao tentar contatos alternativos)."
+  - nome: Status
+    tipo: int
+    nulo: false
+    descricao: "Status do caso em INT (enum). Conceitualmente: Ativo, Pausado, Hibernado, Encerrado. Valores numéricos do enum não documentados."
+  - nome: FaseVendaId
+    tipo: uniqueidentifier
+    nulo: false
+    descricao: "Id da fase de venda atual do caso no funil."
+  - nome: ScoreAtual
+    tipo: int
+    nulo: false
+    descricao: "Score atual do caso/lead calculado pela IA (quanto maior, mais quente)."
+  - nome: CanalAtual
+    tipo: int
+    nulo: false
+    descricao: "Canal atualmente em uso pela cadência, em INT (enum). Conceitualmente: telefone, email, linkedin, whatsapp. Valores do enum não documentados."
+  - nome: NumeroTentativas
+    tipo: int
+    nulo: false
+    descricao: "Número total de tentativas de contato realizadas neste caso."
+  - nome: NumeroContatosAlternativosTentados
+    tipo: int
+    nulo: false
+    descricao: "Quantos contatos alternativos (além do principal) já foram tentados no caso."
+  - nome: ProximaAcaoEm
+    tipo: datetime2
+    nulo: false
+    descricao: "Data/hora agendada para a próxima ação da IA neste caso."
+  - nome: UltimaAcaoEm
+    tipo: datetime2
+    nulo: false
+    descricao: "Data/hora da última ação executada no caso."
+  - nome: MotivoStatus
+    tipo: nvarchar
+    nulo: false
+    descricao: "Texto explicando o motivo do status atual (ex.: por que foi hibernado/encerrado)."
+  - nome: CriadoEm
+    tipo: datetime2
+    nulo: false
+    descricao: "Data/hora de criação do caso."
+  - nome: AtualizadoEm
+    tipo: datetime2
+    nulo: false
+    descricao: "Data/hora da última atualização do caso."
+  - nome: TentativasSemSucesso
+    tipo: int
+    nulo: false
+    descricao: "Contador de tentativas consecutivas sem sucesso (insumo para hibernar/encerrar)."
+  - nome: HibernandoAte
+    tipo: datetime2
+    nulo: false
+    descricao: "Data/hora até quando o caso permanece hibernado (sem ação da IA)."
+
+relacionamentos:
+  []
+
+gotchas:
+  - "FK do vendedor = `UsuarioVendedorId` (não existe 'UsuarioId'). O JOIN canônico é UsuarioVendedorId -> AspNetUsers.Id e o e-mail vem de AspNetUsers.Email."
+  - "`Status` e `CanalAtual` são INT (enums); filtros por string ('Hibernado', 'Ativo') podem não funcionar. Valores numéricos do enum não estão documentados."
+  - "Um caso tem vários passos (PassosCadenciaIa.CasoCadenciaIaId = CasosCadenciaIa.Id). Ao agregar a partir do CTE de passos, conte casos com COUNT(DISTINCT caso_id)."
+  - "Caso hibernado: além de Status, há `HibernandoAte` (timestamp) e `TentativasSemSucesso` como insumos do estado."
+
+queries_exemplo:
+  - pergunta: "Quantos casos existem por status?"
+    sql: "SELECT c.Status, COUNT(*) AS total_casos FROM CasosCadenciaIa c GROUP BY c.Status ORDER BY total_casos DESC"
+  - pergunta: "Ranking de vendedores com mais casos hibernados"
+    sql: "SELECT u.Email AS vendedor_email, COUNT(*) AS casos_hibernados FROM CasosCadenciaIa c LEFT JOIN AspNetUsers u ON u.Id = c.UsuarioVendedorId WHERE c.HibernandoAte IS NOT NULL AND c.HibernandoAte > GETDATE() GROUP BY u.Email ORDER BY casos_hibernados DESC"
+  - pergunta: "Casos com próxima ação atrasada (vencida) por vendedor"
+    sql: "SELECT u.Email AS vendedor_email, COUNT(*) AS casos_atrasados FROM CasosCadenciaIa c LEFT JOIN AspNetUsers u ON u.Id = c.UsuarioVendedorId WHERE c.ProximaAcaoEm < GETDATE() GROUP BY u.Email ORDER BY casos_atrasados DESC"
+  - pergunta: "Score médio e número médio de tentativas dos casos por vendedor"
+    sql: "SELECT u.Email AS vendedor_email, AVG(CAST(c.ScoreAtual AS float)) AS score_medio, AVG(CAST(c.NumeroTentativas AS float)) AS tentativas_medias, COUNT(*) AS total_casos FROM CasosCadenciaIa c LEFT JOIN AspNetUsers u ON u.Id = c.UsuarioVendedorId GROUP BY u.Email ORDER BY total_casos DESC"

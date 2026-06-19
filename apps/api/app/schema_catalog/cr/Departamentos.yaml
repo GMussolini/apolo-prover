@@ -1,0 +1,49 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: Departamentos
+base: cr
+linhas_aprox: 3
+tamanho_mb: 0.07
+chave_primaria: [Id]
+usado_por_dominios: [CR_FOLHA_PESSOAS]
+descricao: "Tabela de domínio (lookup) com os departamentos/áreas da empresa. O departamento de um colaborador é derivado via Cargo: Colaboradores -> Cargos.DepartamentoId -> Departamentos."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Id (uniqueidentifier) do departamento. Alvo de Cargos.DepartamentoId."
+  - nome: Nome
+    tipo: varchar
+    nulo: false
+    descricao: "Nome do departamento (ex.: 'Tecnologia', 'Comercial'). É o rótulo legível desta tabela."
+  - nome: Ativo
+    tipo: bit
+    nulo: false
+    descricao: "Flag indicando se o departamento está ativo (1 = ativo)."
+  - nome: IdEmpresaSistema
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.EmpresasSistema
+    descricao: "FK para a empresa do sistema (multi-empresa). Na prática há uma única empresa configurada."
+  - nome: IdFilial
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.Filiais
+    descricao: "FK para a filial à qual o departamento pertence."
+
+relacionamentos:
+  - "Departamentos.IdEmpresaSistema -> dbo.EmpresasSistema"
+  - "Departamentos.IdFilial -> dbo.Filiais"
+
+gotchas:
+  - "O rótulo legível é `Nome` (NÃO 'Descricao'). Atenção: MotivoDesligamento usa 'Descricao', mas Departamentos e Cargos usam `Nome`."
+  - "Colaboradores NÃO tem DepartamentoId direto. Para obter o departamento de uma pessoa, junte Colaboradores -> Cargos (col.CargoId) -> Departamentos (cargo.DepartamentoId)."
+  - "Lookup muito pequeno (~3 linhas). Use só para rotular/agrupar; nunca agregue valores aqui."
+
+queries_exemplo:
+  - pergunta: "Quais departamentos existem?"
+    sql: "SELECT Nome FROM Departamentos WHERE Ativo = 1 ORDER BY Nome"
+  - pergunta: "Quantos colaboradores por departamento?"
+    sql: "SELECT dep.Nome AS departamento, COUNT(*) AS qtd FROM Colaboradores col INNER JOIN Cargos cargo ON cargo.Id = col.CargoId INNER JOIN Departamentos dep ON dep.Id = cargo.DepartamentoId GROUP BY dep.Nome ORDER BY qtd DESC"

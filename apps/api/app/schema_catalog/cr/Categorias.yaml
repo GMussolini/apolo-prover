@@ -1,0 +1,43 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: Categorias
+base: cr
+linhas_aprox: 7
+tamanho_mb: 0.07
+chave_primaria: [Id]
+usado_por_dominios: [CR_FLUXO_CAIXA]
+descricao: "Catálogo de categorias financeiras (tabela de domínio, ~7 linhas). Cada categoria pertence a um Grupo e classifica lançamentos financeiros."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Identificador único da categoria."
+  - nome: Descricao
+    tipo: nvarchar
+    nulo: false
+    descricao: "Nome/descrição da categoria financeira (ex.: 'Folha', 'Impostos'). Este é o campo de rótulo da tabela."
+  - nome: Ativo
+    tipo: bit
+    nulo: false
+    descricao: "Flag: 1 = categoria ativa/disponível, 0 = inativa."
+  - nome: GrupoId
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.Grupos
+    descricao: "FK para Grupos — grupo financeiro ao qual a categoria pertence."
+
+relacionamentos:
+  - "Categorias.GrupoId -> dbo.Grupos"
+
+gotchas:
+  - "O rótulo da categoria está em `Descricao` — NÃO existe coluna 'Nome' nesta tabela (diferente de Empresas, que usa `Nome`)."
+  - "ContasAPagar e ContasAReceber NÃO têm FK direta para Categorias: a ligação conta↔categoria vive em LancamentoPagamentos. Por isso o domínio CR_FLUXO_CAIXA emite `categoria` como NULL."
+  - "Tabela de domínio pequena (~7 linhas); serve para lookup/classificação, não para agregação de valores."
+
+queries_exemplo:
+  - pergunta: "Quais categorias financeiras existem e estão ativas?"
+    sql: "SELECT Descricao FROM Categorias WHERE Ativo = 1 ORDER BY Descricao"
+  - pergunta: "Listar todas as categorias cadastradas"
+    sql: "SELECT Descricao, Ativo FROM Categorias ORDER BY Descricao"

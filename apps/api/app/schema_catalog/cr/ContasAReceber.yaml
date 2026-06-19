@@ -1,0 +1,89 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: ContasAReceber
+base: cr
+linhas_aprox: 526
+tamanho_mb: 0.26
+chave_primaria: [Id]
+usado_por_dominios: [CR_FLUXO_CAIXA]
+descricao: "Contas a receber da Prover — entradas de caixa (boletos/notas faturados às empresas clientes). Cada linha é o valor a receber de uma empresa cliente num período de referência."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Identificador único da conta a receber (uniqueidentifier; serializado como NVARCHAR(36) no domínio)."
+  - nome: EmpresaId
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.Empresas
+    descricao: "FK para Empresas — a empresa cliente pagadora. Join traz Empresas.Nome (favorecido/empresa_cliente no domínio)."
+  - nome: Periodo
+    tipo: datetime2
+    nulo: false
+    descricao: "Período/competência (mês/ano de referência). Usado como data de vencimento no domínio."
+  - nome: ValorNota
+    tipo: money
+    nulo: false
+    descricao: "Valor da nota fiscal (money). Fallback do valor a receber quando ValorBoleto não está preenchido."
+  - nome: Status
+    tipo: nvarchar
+    nulo: false
+    descricao: "Status textual original da conta a receber. Valores reais: 'Pago', 'Faturado', 'Aguardando', 'Não Aprovado', 'Negociação', 'Pendente', 'Full' (e NULL). PODE divergir de DataPgBoleto (ex.: há contas 'Pago' com DataPgBoleto nula)."
+  - nome: EmpresaOrigemId
+    tipo: uniqueidentifier
+    nulo: false
+    fk_para: dbo.EmpresaOrigens
+    descricao: "FK para EmpresaOrigens — empresa de origem/faturamento do recebível. Exposta no domínio CR_FLUXO_CAIXA como empresa_origem (EmpresaOrigens.Nome) no ramo receber."
+  - nome: ValorBoleto
+    tipo: money
+    nulo: false
+    descricao: "Valor do boleto (money). É o valor a receber primário: o domínio usa COALESCE(ValorBoleto, ValorNota)."
+  - nome: DataPgBoleto
+    tipo: datetime2
+    nulo: false
+    descricao: "Data de pagamento/recebimento do boleto. IS NULL = ainda não recebida (em aberto)."
+  - nome: DtGeracaoFolha
+    tipo: datetime
+    nulo: false
+    descricao: "Data em que a folha que originou este recebível foi gerada."
+  - nome: NrAno
+    tipo: int
+    nulo: false
+    descricao: "Ano de competência (duplicado de Periodo, prático para filtros rápidos)."
+  - nome: NrMes
+    tipo: int
+    nulo: false
+    descricao: "Mês de competência (1..12; duplicado de Periodo)."
+  - nome: TipoFolha
+    tipo: int
+    nulo: false
+    descricao: "Código do tipo de folha que gerou o recebível."
+  - nome: Observacao
+    tipo: nvarchar
+    nulo: false
+    descricao: "Observação livre da conta a receber."
+
+relacionamentos:
+  - "ContasAReceber.EmpresaId -> dbo.Empresas"
+  - "ContasAReceber.EmpresaOrigemId -> dbo.EmpresaOrigens"
+
+gotchas:
+  - "Valor a receber = `COALESCE(ValorBoleto, ValorNota)` — não existe coluna 'Valor'. Prefira ValorBoleto; ValorNota é fallback."
+  - "Data de recebimento = `DataPgBoleto`; `DataPgBoleto IS NULL` significa recebível ainda em aberto. Competência fica em `Periodo` / `NrAno` + `NrMes`."
+  - "`Status` (valores reais: Pago / Faturado / Aguardando / Não Aprovado / Negociação / Pendente / Full / NULL) PODE divergir de `DataPgBoleto`: há ~2 contas 'Pago' com DataPgBoleto nula. O domínio define recebido/em-aberto por DataPgBoleto (data), não por Status."
+  - "`Periodo` é COMPETÊNCIA (mês/ano de referência), não vencimento contratual. Há registros-lixo de conversão (linhas com NrAno=1); em somas/médias filtre valor > 0 AND NrAno >= 2020."
+  - "`EmpresaOrigemId` (FK→EmpresaOrigens) identifica a empresa de origem/faturamento e é exposta no domínio como empresa_origem (eo.Nome) no ramo receber."
+  - "NÃO há FK para Categorias — a categorização vive em LancamentoPagamentos (fora do domínio), por isso o domínio emite categoria como NULL no ramo receber."
+  - "Favorecido NÃO vem de PessoaFavorecidos: no ramo receber o favorecido/empresa_cliente é Empresas.Nome (via EmpresaId)."
+
+queries_exemplo:
+  - pergunta: "Quanto há a receber no mês de março de 2026?"
+    sql: "SELECT ROUND(SUM(COALESCE(ValorBoleto, ValorNota)), 2) AS total_receber FROM ContasAReceber WHERE NrAno = 2026 AND NrMes = 3"
+  - pergunta: "Faturamento recebido em 2026 por empresa cliente"
+    sql: "SELECT emp.Nome AS empresa_cliente, ROUND(SUM(COALESCE(cr.ValorBoleto, cr.ValorNota)), 2) AS faturamento FROM ContasAReceber cr LEFT JOIN Empresas emp ON emp.Id = cr.EmpresaId WHERE cr.DataPgBoleto IS NOT NULL AND YEAR(cr.DataPgBoleto) = 2026 GROUP BY emp.Nome ORDER BY faturamento DESC"
+  - pergunta: "Boletos ainda não recebidos (em aberto) em 2026"
+    sql: "SELECT ROUND(SUM(COALESCE(ValorBoleto, ValorNota)), 2) AS total_em_aberto, COUNT(*) AS qtd FROM ContasAReceber WHERE NrAno = 2026 AND DataPgBoleto IS NULL"
+  - pergunta: "Total a receber por mês em 2026"
+    sql: "SELECT NrMes AS mes, ROUND(SUM(COALESCE(ValorBoleto, ValorNota)), 2) AS total FROM ContasAReceber WHERE NrAno = 2026 GROUP BY NrMes ORDER BY NrMes"

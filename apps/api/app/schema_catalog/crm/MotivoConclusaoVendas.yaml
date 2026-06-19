@@ -1,0 +1,37 @@
+# Catálogo de schema APOLO — fatos gerados de _dump/*.tsv por _gerar.py.
+# Edite livremente descricao / gotchas / queries_exemplo (enriquecimento manual).
+tabela: MotivoConclusaoVendas
+base: crm
+linhas_aprox: 12
+tamanho_mb: 0.07
+chave_primaria: [Id]
+usado_por_dominios: [CRM_PIPELINE]
+descricao: "Tabela de domínio (lookup) com os motivos de conclusão de uma venda — ganho ou perda (ex.: 'Ganho', 'Perdido - concorrente'). Referenciada por Clients.MotivoConclusaoVendaID; usada para analisar resultado/causa de fechamento."
+
+colunas:
+  - nome: Id
+    tipo: uniqueidentifier
+    nulo: false
+    pk: true
+    descricao: "Chave primária do motivo; alvo de Clients.MotivoConclusaoVendaID."
+  - nome: Descricao
+    tipo: nvarchar
+    nulo: false
+    descricao: "Texto legível do motivo de ganho/perda (ex.: 'Ganho', 'Perdido - concorrente'). É ESTE campo que aparece nas respostas/filtros — não há coluna 'Nome'."
+  - nome: Ativo
+    tipo: bit
+    nulo: false
+    descricao: "Indica se o motivo está ativo/disponível para uso (1) ou desativado (0)."
+
+relacionamentos:
+  []
+
+gotchas:
+  - "O texto do motivo fica em Descricao, NÃO em 'Nome' (essa coluna não existe). Filtre por mc.Descricao = 'Ganho'."
+  - "É lookup de Clients. PreLeads não tem motivo de conclusão; só clientes convertidos."
+
+queries_exemplo:
+  - pergunta: "Quantos clientes por motivo de conclusão de venda?"
+    sql: "SELECT mc.Descricao AS motivo, COUNT(*) AS total FROM Clients c LEFT JOIN MotivoConclusaoVendas mc ON mc.Id = c.MotivoConclusaoVendaID GROUP BY mc.Descricao ORDER BY total DESC"
+  - pergunta: "Quais os motivos de perda cadastrados?"
+    sql: "SELECT Descricao FROM MotivoConclusaoVendas WHERE Ativo = 1 AND Descricao LIKE '%Perdido%' ORDER BY Descricao"
