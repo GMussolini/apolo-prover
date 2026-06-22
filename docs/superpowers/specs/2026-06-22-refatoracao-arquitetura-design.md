@@ -146,15 +146,12 @@ o **mesmo dict no fio** — o `Event` tipado tem um `.to_wire()` que produz exat
 Isso garante o contrato de preservação e, de quebra, permite que a suíte de teste consuma os eventos
 semânticos sem reparsear SSE.
 
-### Retry/backoff
-Política de retry com backoff+jitter (bounded, ex. 2 tentativas) vive **dentro do adapter de LLM**
-(`ports/llm.py` → `AnthropicAdapter`), não espalhada nos estágios. Aplicada só a falhas transientes
-(429/503/529). Isto é endurecimento de robustez, não funcionalidade nova — o comportamento de
-sucesso é idêntico; muda só o que acontece num erro transiente que hoje já é tratado como falha.
-
-> **Nota de escopo:** o retry é o único item que altera comportamento em caso de *falha transiente*.
-> Se o usuário preferir preservação 100% literal inclusive nesse caso, o retry sai do escopo e vira
-> backlog. Decisão a confirmar na revisão do spec.
+### Retry/backoff — FORA DO ESCOPO (backlog)
+**Decidido em 2026-06-22:** retry/backoff nas chamadas de LLM **não** faz parte desta refatoração.
+Por ser o único item que alteraria comportamento (em caso de falha transiente 429/503/529), vai pro
+backlog para manter a entrega 100% sem mudança de comportamento. O adapter de LLM (`ports/llm.py`)
+fica desenhado de forma que adicionar retry depois seja trivial (um único ponto), mas a implementação
+do retry NÃO entra agora.
 
 ---
 
@@ -213,10 +210,9 @@ camada de WebRTC, apenas consumida pelo `useVoiceCall`. Mesma renderização fin
 4. **Fase 3 — Estágios:** mover cada bloco do monólito para `stages/*` um a um, rodando o snapshot a
    cada movimento. Orquestrador encolhe.
 5. **Fase 4 — Política única de erro/persistência:** colapsar os 7 `except` na política do orquestrador.
-6. **Fase 5 — Retry no adapter de LLM** (se aprovado no spec).
-7. **Fase 6 — Frontend:** extrair `lib/sse.ts`, `useChatTurn`, `useVoiceCall`, fatiar `ChatPanel`.
+6. **Fase 5 — Frontend:** extrair `lib/sse.ts`, `useChatTurn`, `useVoiceCall`, fatiar `ChatPanel`.
    Teste de caracterização do hook verde.
-8. **Fase 7 — Limpeza:** remover código morto, atualizar imports, rodar suíte completa + build gate
+7. **Fase 6 — Limpeza:** remover código morto, atualizar imports, rodar suíte completa + build gate
    do catálogo + subir a stack e fazer smoke manual das mesmas perguntas.
 
 Cada fase é um commit (ou poucos) na branch, sempre com a suíte verde. `main` permanece intocado até
@@ -230,7 +226,7 @@ o merge final.
 | Mover estágio altera ordem/timing de eventos | Mover um estágio por commit, snapshot a cada passo |
 | `montar_sql_final` / `sql_guard` mudarem semântica | Não tocados; só movidos/renomeados, cobertos por teste existente |
 | Frontend muda render sutilmente | Subcomponentes apresentacionais preservados; só extração de estado |
-| Retry introduzir comportamento novo | Isolado no adapter, opcional, decisão explícita no spec |
+| Retry introduzir comportamento novo | Fora do escopo (backlog) — não implementado nesta entrega |
 | Escopo "rastejar" para features | §2 explícito; qualquer ideia nova vira backlog |
 
 ## 10. Critérios de aceite
