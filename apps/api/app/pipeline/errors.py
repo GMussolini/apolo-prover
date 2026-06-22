@@ -17,7 +17,7 @@ class ApoloError(Exception):
 
 class RateLimited(ApoloError):
     def __init__(self, detail: str):
-        super().__init__(str(detail), "rate_limit", "error_event")
+        super().__init__(str(detail), "rate_limit", "error_event", causa=detail)
 
 class ClassifyFailed(ApoloError):
     def __init__(self, causa=None):
