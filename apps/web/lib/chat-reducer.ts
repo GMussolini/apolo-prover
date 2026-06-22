@@ -1,4 +1,4 @@
-import { type Mensagem, type Etapa, type EtapaKey, ETAPAS_INICIAIS } from "@/components/ChatMessage";
+import { type Mensagem, type Etapa, type EtapaKey } from "@/components/ChatMessage";
 
 export function updateLast(
   arr: Mensagem[],
