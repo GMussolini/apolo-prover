@@ -15,6 +15,8 @@ def _carregar(nome):
 
 async def _rodar(caso, monkeypatch):
     from app.core import engine
+    from app.pipeline import orchestrator
+    from app.pipeline.stages import rate_limit as _rate_limit_stage
     from app.pipeline.deps import Deps
     from app.core.config import get_config
 
@@ -23,8 +25,8 @@ async def _rodar(caso, monkeypatch):
     fake_store = FakeStore(historico=caso.get("historico", []))
 
     deps = Deps(llm=fake_llm, sql=fake_sql, store=fake_store, cfg=get_config())
-    monkeypatch.setattr(engine, "default_deps", lambda: deps)
-    monkeypatch.setattr(engine, "consumir_pergunta", _no_rate_limit)
+    monkeypatch.setattr(orchestrator, "default_deps", lambda: deps)
+    monkeypatch.setattr(_rate_limit_stage, "consumir_pergunta", _no_rate_limit)
 
     eventos = await coletar_eventos(engine.processar_pergunta(
         caso["usuario"], caso["sessao_id"], caso["pergunta"], canal=caso.get("canal", "texto"),
