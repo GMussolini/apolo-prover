@@ -6,6 +6,9 @@ requires-python = ">=3.12"
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+markers = [
+    "eval: testes de correcao semantica contra a base real (on-demand; nao roda no CI). Requer APOLO_EVAL_BASE_URL + stack no ar.",
+]
 
 [tool.ruff]
 line-length = 120
