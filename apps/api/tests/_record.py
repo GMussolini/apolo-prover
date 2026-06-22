@@ -12,7 +12,8 @@ import asyncio
 from pathlib import Path
 from unittest.mock import patch
 from app.core import engine
-from app.services import anthropic_service
+from app.pipeline.deps import Deps
+from app.core.config import get_config
 from tests.fakes import FakeLLM, FakeSql, FakeStore, coletar_eventos
 
 FIX = Path(__file__).parent / "fixtures" / "turns"
@@ -35,12 +36,8 @@ async def _rodar(caso):
     fake_llm = FakeLLM(caso["llm"])
     fake_sql = FakeSql(RuntimeError(caso["sql_raise"]) if caso.get("sql_raise") else caso.get("sql_result", []))
     fake_store = FakeStore(historico=caso.get("historico", []))
-    with patch.object(anthropic_service, "chat_json", fake_llm.chat_json), \
-         patch.object(anthropic_service, "chat_texto", fake_llm.chat_texto), \
-         patch.object(anthropic_service, "estimar_custo", fake_llm.estimar_custo), \
-         patch.object(engine, "execute_query", fake_sql.execute_query), \
-         patch.object(engine, "_carregar_historico", fake_store.load_history), \
-         patch.object(engine, "_salvar_pergunta_resposta", lambda **kw: fake_store.save_turn(**kw)), \
+    deps = Deps(llm=fake_llm, sql=fake_sql, store=fake_store, cfg=get_config())
+    with patch.object(engine, "default_deps", lambda: deps), \
          patch.object(engine, "consumir_pergunta", _no_rate_limit):
         return await coletar_eventos(engine.processar_pergunta(
             caso["usuario"], caso["sessao_id"], caso["pergunta"], canal=caso.get("canal", "texto")))

@@ -15,19 +15,15 @@ def _carregar(nome):
 
 async def _rodar(caso, monkeypatch):
     from app.core import engine
-    from app.services import anthropic_service
+    from app.pipeline.deps import Deps
+    from app.core.config import get_config
 
     fake_llm = FakeLLM(caso["llm"])
     fake_sql = FakeSql(RuntimeError(caso["sql_raise"]) if caso.get("sql_raise") else caso.get("sql_result", []))
     fake_store = FakeStore(historico=caso.get("historico", []))
 
-    # injeta nas dependências que o engine atual usa
-    monkeypatch.setattr(anthropic_service, "chat_json", fake_llm.chat_json)
-    monkeypatch.setattr(anthropic_service, "chat_texto", fake_llm.chat_texto)
-    monkeypatch.setattr(anthropic_service, "estimar_custo", fake_llm.estimar_custo)
-    monkeypatch.setattr(engine, "execute_query", fake_sql.execute_query)
-    monkeypatch.setattr(engine, "_carregar_historico", fake_store.load_history)
-    monkeypatch.setattr(engine, "_salvar_pergunta_resposta", lambda **kw: fake_store.save_turn(**kw))
+    deps = Deps(llm=fake_llm, sql=fake_sql, store=fake_store, cfg=get_config())
+    monkeypatch.setattr(engine, "default_deps", lambda: deps)
     monkeypatch.setattr(engine, "consumir_pergunta", _no_rate_limit)
 
     eventos = await coletar_eventos(engine.processar_pergunta(

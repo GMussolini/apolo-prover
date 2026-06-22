@@ -25,6 +25,7 @@ from app.core.permissoes import usuario_pode
 from app.core.rate_limiter import consumir_pergunta
 from app.core.sql_guard import SqlNaoPermitidoError
 from app.domains import REGISTRY, listar_ativos
+from app.pipeline.deps import default_deps
 from app.services import anthropic_service, prompts_service
 from app.services import pipeline as pipe
 
@@ -172,7 +173,8 @@ async def processar_pergunta(
 
     Cada yield é um dict com chave `type` ∈ {status, sql, token, chart, done, error}.
     """
-    cfg = get_config()
+    deps = default_deps()
+    cfg = deps.cfg
     t0 = time.perf_counter()
 
     tokens_input_total = 0
@@ -195,7 +197,7 @@ async def processar_pergunta(
 
     async def _persistir():
         try:
-            await _salvar_pergunta_resposta(
+            await deps.store.save_turn(
                 sessao_id=sessao_id,
                 usuario_id=usuario["id"],
                 pergunta=pergunta,
@@ -235,7 +237,7 @@ async def processar_pergunta(
     # ------------------------------------------------------------
     # 2) Histórico
     # ------------------------------------------------------------
-    historico_rows = await _carregar_historico(sessao_id, limite=5)
+    historico_rows = await deps.store.load_history(sessao_id, limite=5)
     historico_txt = _format_historico(historico_rows)
 
     # ------------------------------------------------------------
@@ -252,7 +254,7 @@ async def processar_pergunta(
     )
 
     try:
-        clf = await anthropic_service.chat_json(
+        clf = await deps.llm.chat_json(
             modelo=cfg.model_classificador,
             system=prompt_clf,
             user=pergunta,
@@ -269,7 +271,7 @@ async def processar_pergunta(
 
     tokens_input_total += clf["tokens_input"]
     tokens_output_total += clf["tokens_output"]
-    custo_total += anthropic_service.estimar_custo(
+    custo_total += deps.llm.estimar_custo(
         cfg.model_classificador, clf["tokens_input"], clf["tokens_output"]
     )
 
@@ -333,7 +335,7 @@ async def processar_pergunta(
     prompt_sql = prompts_service.render("sql_generator", **ctx_sql)
 
     try:
-        sqlgen = await anthropic_service.chat_json(
+        sqlgen = await deps.llm.chat_json(
             modelo=cfg.model_sql_generator,
             system=prompt_sql,
             user=pergunta_reform,
@@ -353,7 +355,7 @@ async def processar_pergunta(
 
     tokens_input_total += sqlgen["tokens_input"]
     tokens_output_total += sqlgen["tokens_output"]
-    custo_total += anthropic_service.estimar_custo(
+    custo_total += deps.llm.estimar_custo(
         cfg.model_sql_generator, sqlgen["tokens_input"], sqlgen["tokens_output"]
     )
 
@@ -390,7 +392,7 @@ async def processar_pergunta(
     yield {"type": "status", "text": "Consultando dados..."}
 
     try:
-        df = await execute_query(
+        df = await deps.sql.execute_query(
             dominio.base_conexao,
             sql_final,
             timeout=cfg.sql_query_timeout_seconds,
@@ -422,7 +424,7 @@ async def processar_pergunta(
             total_linhas=total_linhas,
         )
         try:
-            resp = await anthropic_service.chat_texto(
+            resp = await deps.llm.chat_texto(
                 modelo=cfg.model_response_voice,
                 system=prompt_voz,
                 user=pergunta_reform,
@@ -442,7 +444,7 @@ async def processar_pergunta(
 
         tokens_input_total += resp["tokens_input"]
         tokens_output_total += resp["tokens_output"]
-        custo_total += anthropic_service.estimar_custo(
+        custo_total += deps.llm.estimar_custo(
             cfg.model_response_voice, resp["tokens_input"], resp["tokens_output"]
         )
 
@@ -461,7 +463,7 @@ async def processar_pergunta(
             total_linhas=total_linhas,
         )
         try:
-            resp = await anthropic_service.chat_json(
+            resp = await deps.llm.chat_json(
                 modelo=cfg.model_response_text,
                 system=prompt_resp,
                 user=pergunta_reform,
@@ -481,7 +483,7 @@ async def processar_pergunta(
 
         tokens_input_total += resp["tokens_input"]
         tokens_output_total += resp["tokens_output"]
-        custo_total += anthropic_service.estimar_custo(
+        custo_total += deps.llm.estimar_custo(
             cfg.model_response_text, resp["tokens_input"], resp["tokens_output"]
         )
 
