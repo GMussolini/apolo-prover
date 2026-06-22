@@ -1,4 +1,4 @@
-from app.domains._base import Dominio, Ramo
+from app.domains._base import Dominio, Ramo, Coluna
 
 
 def test_dominio_simples_um_ramo():
@@ -7,12 +7,22 @@ def test_dominio_simples_um_ramo():
         descricao="dominio de teste",
         palavras_chave="teste,exemplo",
         base_conexao="crm",
-        query_base="SELECT * FROM x WHERE {FILTROS}",
-        ramos=(Ramo("principal", "FILTROS", {"vendedor": "u.Email"}),),
+        cte_template="SELECT * FROM x WHERE ({FILTROS})",
+        ramos=(
+            Ramo(
+                nome="principal",
+                placeholder="FILTROS",
+                descricao="ramo principal",
+                colunas_filtraveis=(
+                    Coluna(alias="vendedor", expr="u.Email", tipo="str", descricao="email do vendedor"),
+                ),
+            ),
+        ),
     )
     assert d.nome == "TESTE"
     assert len(d.ramos) == 1
-    assert d.ramos[0].map_filtros["vendedor"] == "u.Email"
+    assert d.ramos[0].placeholder == "FILTROS"
+    assert d.ramos[0].colunas_filtraveis[0].expr == "u.Email"
 
 
 def test_dominio_multi_ramo():
@@ -21,11 +31,24 @@ def test_dominio_multi_ramo():
         descricao="x",
         palavras_chave="y",
         base_conexao="cr",
-        query_base="WITH a AS (...), b AS (...) SELECT * FROM a UNION ALL SELECT * FROM b",
-        cte_template="WITH pagar AS ({FILTROS_PAGAR}) UNION receber AS ({FILTROS_RECEBER})",
+        cte_template="WITH pagar AS ({FILTROS_PAGAR}) UNION ALL SELECT * FROM ({FILTROS_RECEBER})",
         ramos=(
-            Ramo("pagar", "FILTROS_PAGAR", {"data_vencimento": "DataVencimento"}),
-            Ramo("receber", "FILTROS_RECEBER", {"empresa": "e.NomeFantasia"}),
+            Ramo(
+                nome="pagar",
+                placeholder="FILTROS_PAGAR",
+                colunas_filtraveis=(
+                    Coluna(alias="data_vencimento", expr="DataVencimento", tipo="date", descricao="vencimento"),
+                ),
+            ),
+            Ramo(
+                nome="receber",
+                placeholder="FILTROS_RECEBER",
+                colunas_filtraveis=(
+                    Coluna(alias="empresa", expr="e.NomeFantasia", tipo="str", descricao="empresa"),
+                ),
+            ),
         ),
     )
     assert len(d.ramos) == 2
+    assert d.ramos[1].nome == "receber"
+    assert d.ramos[1].colunas_filtraveis[0].alias == "empresa"
