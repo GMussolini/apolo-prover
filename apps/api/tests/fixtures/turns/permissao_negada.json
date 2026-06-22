@@ -1,0 +1,55 @@
+{
+  "usuario": {
+    "id": 1,
+    "permissoes": "",
+    "is_admin": false
+  },
+  "sessao_id": "s1",
+  "pergunta": "entregas atrasadas",
+  "canal": "texto",
+  "historico": [],
+  "llm": [
+    {
+      "data": {
+        "dominio": "CR_DELIVERY",
+        "confidence": 0.9,
+        "pergunta_reformulada": "entregas atrasadas",
+        "refinamento": null
+      },
+      "tokens_input": 90,
+      "tokens_output": 12
+    }
+  ],
+  "sql_result": [],
+  "sql_raise": null,
+  "eventos_esperados": [
+    {
+      "type": "status",
+      "text": "Entendendo sua pergunta..."
+    },
+    {
+      "type": "classification",
+      "dominio": "CR_DELIVERY",
+      "confidence": 0.9
+    },
+    {
+      "type": "token",
+      "delta": "Você não tem permissão para acessar o do"
+    },
+    {
+      "type": "token",
+      "delta": "mínio **CR_DELIVERY**. Fale com o admini"
+    },
+    {
+      "type": "token",
+      "delta": "strador se precisar de acesso."
+    },
+    {
+      "type": "done",
+      "tokens": {
+        "input": 90,
+        "output": 12
+      }
+    }
+  ]
+}

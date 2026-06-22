@@ -1,0 +1,91 @@
+{
+  "usuario": {
+    "id": 1,
+    "permissoes": "",
+    "is_admin": true
+  },
+  "sessao_id": "s1",
+  "pergunta": "quantos leads ativos?",
+  "canal": "texto",
+  "historico": [],
+  "llm": [
+    {
+      "data": {
+        "dominio": "CRM_PIPELINE",
+        "confidence": 0.95,
+        "pergunta_reformulada": "quantos leads ativos",
+        "refinamento": null
+      },
+      "tokens_input": 100,
+      "tokens_output": 20
+    },
+    {
+      "data": {
+        "wheres": {
+          "prelead": "1=0",
+          "lead": "c.FaseAtivo = 1"
+        },
+        "select_list": "COUNT(*) AS qtd",
+        "group_by": "",
+        "order_by": "",
+        "top": 500
+      },
+      "tokens_input": 200,
+      "tokens_output": 30
+    },
+    {
+      "data": {
+        "resposta": "Há 42 leads ativos.",
+        "grafico_sugerido": null,
+        "spec_grafico": null
+      },
+      "tokens_input": 80,
+      "tokens_output": 15
+    }
+  ],
+  "sql_result": [
+    {
+      "qtd": 42
+    }
+  ],
+  "sql_raise": null,
+  "eventos_esperados": [
+    {
+      "type": "status",
+      "text": "Entendendo sua pergunta..."
+    },
+    {
+      "type": "classification",
+      "dominio": "CRM_PIPELINE",
+      "confidence": 0.95
+    },
+    {
+      "type": "status",
+      "text": "Gerando consulta..."
+    },
+    {
+      "type": "sql",
+      "sql": "WITH pipeline AS (\nSELECT 'prelead' AS tipo, p.Id AS id, p.NomeEmpresa AS nome, p.EmailContato AS email, p.Telefone AS telefone,\n       p.DtCriacao AS data_cadastro, s.Descricao AS status,\n       NULL AS fase_venda, NULL AS motivo_conclusao,\n       NULL AS area_atuacao, u.Email AS vendedor_email, u.Nome AS vendedor_nome\nFROM PreLeads p\nLEFT JOIN StatusPreLeads s ON s.Id = p.StatusPreLeadId\nLEFT JOIN AspNetUsers u    ON u.Id = p.UsuarioId\nWHERE (1=0)\n\nUNION ALL\n\nSELECT 'lead' AS tipo, c.Id AS id, c.RazaoSocial AS nome,\n       COALESCE(NULLIF(LTRIM(RTRIM(c.Email)),''), (SELECT TOP 1 ccp.Email FROM ClientContacts ccp WHERE ccp.ClientID = c.Id AND ccp.Email IS NOT NULL AND LTRIM(RTRIM(ccp.Email)) <> '')) AS email,\n       COALESCE(NULLIF(LTRIM(RTRIM(c.Telefone)),''), (SELECT TOP 1 ccp.Telephone FROM ClientContacts ccp WHERE ccp.ClientID = c.Id AND ccp.Telephone IS NOT NULL AND LTRIM(RTRIM(ccp.Telephone)) <> '')) AS telefone,\n       c.Creationdate AS data_cadastro, NULL AS status,\n       fv.Descricao AS fase_venda, mc.Descricao AS motivo_conclusao,\n       a.Descricao AS area_atuacao, u.Email AS vendedor_email, u.Nome AS vendedor_nome\nFROM Clients c\nLEFT JOIN FaseVendas fv            ON fv.Id = c.FaseVendaID\nLEFT JOIN MotivoConclusaoVendas mc ON mc.Id = c.MotivoConclusaoVendaID\nLEFT JOIN AreaAtuacaos a           ON a.Id = c.AreaAtuacaoID\nLEFT JOIN AspNetUsers u            ON u.Id = c.UsuarioId\nWHERE (c.FaseAtivo = 1)\n)\nSELECT TOP 500 COUNT(*) AS qtd FROM pipeline"
+    },
+    {
+      "type": "status",
+      "text": "Consultando dados..."
+    },
+    {
+      "type": "status",
+      "text": "Montando resposta..."
+    },
+    {
+      "type": "token",
+      "delta": "Há 42 leads ativos."
+    },
+    {
+      "type": "done",
+      "tokens": {
+        "input": 380,
+        "output": 65
+      },
+      "custo_usd": 0.000445
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "usuario": {
+    "id": 1,
+    "permissoes": "",
+    "is_admin": true
+  },
+  "sessao_id": "s1",
+  "pergunta": "me ajuda",
+  "canal": "texto",
+  "historico": [],
+  "llm": [
+    {
+      "data": {
+        "dominio": null,
+        "confidence": 0.2,
+        "pergunta_reformulada": "me ajuda",
+        "refinamento": "Sua pergunta está muito ampla. Pode detalhar?"
+      },
+      "tokens_input": 50,
+      "tokens_output": 10
+    }
+  ],
+  "sql_result": [],
+  "sql_raise": null,
+  "eventos_esperados": [
+    {
+      "type": "status",
+      "text": "Entendendo sua pergunta..."
+    },
+    {
+      "type": "token",
+      "delta": "Sua pergunta está muito ampla. Pode deta"
+    },
+    {
+      "type": "token",
+      "delta": "lhar?"
+    },
+    {
+      "type": "done",
+      "tokens": {
+        "input": 50,
+        "output": 10
+      }
+    }
+  ]
+}
