@@ -34,3 +34,7 @@ data/backups/
 .idea/
 *.swp
 .DS_Store
+
+# build logs
+build.log
+*.build.log
