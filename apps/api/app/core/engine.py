@@ -26,6 +26,7 @@ from app.core.rate_limiter import consumir_pergunta
 from app.core.sql_guard import SqlNaoPermitidoError
 from app.domains import REGISTRY, listar_ativos
 from app.pipeline.deps import default_deps
+from app.pipeline.stages._util import chunk_text
 from app.services import anthropic_service, prompts_service
 from app.services import pipeline as pipe
 
@@ -67,14 +68,6 @@ def _format_historico(rows: list[tuple[str, str]]) -> str:
             resp = resp[:400] + "..."
         blocos.append(f"[{i}] Usuário: {pergunta}\n    APOLO: {resp or '(sem resposta)'}")
     return "\n".join(blocos)
-
-
-def _chunk_text(text: str, size: int = 40):
-    """Itera o texto em pedaços de até `size` chars."""
-    if not text:
-        return
-    for i in range(0, len(text), size):
-        yield text[i:i + size]
 
 
 def _df_para_amostra(df: pd.DataFrame, max_linhas: int) -> tuple[list[dict], int]:
@@ -288,7 +281,7 @@ async def processar_pergunta(
     if not dominio_nome or confidence < 0.5 or dominio_nome not in REGISTRY:
         msg = refinamento or "Sua pergunta está muito ampla. Pode detalhar?"
         estado["resposta_texto"] = msg
-        for ch in _chunk_text(msg, 40):
+        for ch in chunk_text(msg, 40):
             yield {"type": "token", "delta": ch}
         await _persistir()
         yield {
@@ -316,7 +309,7 @@ async def processar_pergunta(
         )
         estado["resposta_texto"] = msg
         estado["erro"] = "permissao_negada"
-        for ch in _chunk_text(msg, 40):
+        for ch in chunk_text(msg, 40):
             yield {"type": "token", "delta": ch}
         await _persistir()
         yield {
@@ -347,7 +340,7 @@ async def processar_pergunta(
         estado["erro"] = f"sql_generator: {e}"
         msg = "Tive um problema gerando a consulta. Tente reformular a pergunta."
         estado["resposta_texto"] = msg
-        for ch in _chunk_text(msg, 40):
+        for ch in chunk_text(msg, 40):
             yield {"type": "token", "delta": ch}
         await _persistir()
         yield {"type": "done", "latencia_ms": int((time.perf_counter() - t0) * 1000)}
@@ -367,7 +360,7 @@ async def processar_pergunta(
         estado["erro"] = f"sql_invalido: {e}"
         msg = "A consulta gerada foi bloqueada por segurança. Tente reformular."
         estado["resposta_texto"] = msg
-        for ch in _chunk_text(msg, 40):
+        for ch in chunk_text(msg, 40):
             yield {"type": "token", "delta": ch}
         await _persistir()
         yield {"type": "done", "latencia_ms": int((time.perf_counter() - t0) * 1000)}
@@ -377,7 +370,7 @@ async def processar_pergunta(
         estado["erro"] = f"montar_sql: {e}"
         msg = "Não consegui montar a consulta. Tente reformular."
         estado["resposta_texto"] = msg
-        for ch in _chunk_text(msg, 40):
+        for ch in chunk_text(msg, 40):
             yield {"type": "token", "delta": ch}
         await _persistir()
         yield {"type": "done", "latencia_ms": int((time.perf_counter() - t0) * 1000)}
@@ -402,7 +395,7 @@ async def processar_pergunta(
         estado["erro"] = f"execucao_sql: {e}"
         msg = "Não consegui consultar a base no momento. Tente de novo em instantes."
         estado["resposta_texto"] = msg
-        for ch in _chunk_text(msg, 40):
+        for ch in chunk_text(msg, 40):
             yield {"type": "token", "delta": ch}
         await _persistir()
         yield {"type": "done", "latencia_ms": int((time.perf_counter() - t0) * 1000)}
@@ -436,7 +429,7 @@ async def processar_pergunta(
             estado["erro"] = f"response_voice: {e}"
             msg = "Consegui os dados, mas falhei em narrar. Tente de novo."
             estado["resposta_texto"] = msg
-            for ch in _chunk_text(msg, 40):
+            for ch in chunk_text(msg, 40):
                 yield {"type": "token", "delta": ch}
             await _persistir()
             yield {"type": "done", "latencia_ms": int((time.perf_counter() - t0) * 1000)}
@@ -450,7 +443,7 @@ async def processar_pergunta(
 
         texto = resp["texto"]
         estado["resposta_texto"] = texto
-        for ch in _chunk_text(texto, 40):
+        for ch in chunk_text(texto, 40):
             yield {"type": "token", "delta": ch}
 
     else:
@@ -475,7 +468,7 @@ async def processar_pergunta(
             estado["erro"] = f"response_generator: {e}"
             msg = "Consegui os dados, mas falhei em formatar a resposta. Tente de novo."
             estado["resposta_texto"] = msg
-            for ch in _chunk_text(msg, 40):
+            for ch in chunk_text(msg, 40):
                 yield {"type": "token", "delta": ch}
             await _persistir()
             yield {"type": "done", "latencia_ms": int((time.perf_counter() - t0) * 1000)}
@@ -496,7 +489,7 @@ async def processar_pergunta(
         estado["grafico_sugerido"] = grafico
         estado["spec_grafico"] = spec
 
-        for ch in _chunk_text(texto, 40):
+        for ch in chunk_text(texto, 40):
             yield {"type": "token", "delta": ch}
 
         if grafico and spec:
