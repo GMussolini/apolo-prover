@@ -23,7 +23,7 @@ FROM base AS test
 COPY pyproject.toml .
 COPY app /app/app
 COPY tests /app/tests
-RUN python -m pytest tests/test_catalog_consistency.py -q
+RUN python -m pytest tests/test_catalog_consistency.py tests/test_characterization.py -q
 
 FROM base AS dev
 COPY --from=test /app/app /app/app
