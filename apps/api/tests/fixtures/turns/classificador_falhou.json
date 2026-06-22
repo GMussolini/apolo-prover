@@ -1,0 +1,31 @@
+{
+  "usuario": {
+    "id": 1,
+    "permissoes": "",
+    "is_admin": true
+  },
+  "sessao_id": "s1",
+  "pergunta": "x",
+  "canal": "texto",
+  "historico": [],
+  "llm": [
+    {
+      "raise": "anthropic 500 overloaded"
+    }
+  ],
+  "sql_result": [],
+  "sql_raise": null,
+  "eventos_esperados": [
+    {
+      "type": "status",
+      "text": "Entendendo sua pergunta..."
+    },
+    {
+      "type": "error",
+      "text": "Não consegui entender sua pergunta. Tente reformular."
+    },
+    {
+      "type": "done"
+    }
+  ]
+}

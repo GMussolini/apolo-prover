@@ -1,0 +1,65 @@
+{
+  "usuario": {
+    "id": 1,
+    "permissoes": "",
+    "is_admin": true
+  },
+  "sessao_id": "s1",
+  "pergunta": "leads",
+  "canal": "texto",
+  "historico": [],
+  "llm": [
+    {
+      "data": {
+        "dominio": "CRM_PIPELINE",
+        "confidence": 0.9,
+        "pergunta_reformulada": "leads",
+        "refinamento": null
+      },
+      "tokens_input": 100,
+      "tokens_output": 20
+    },
+    {
+      "data": {
+        "wheres": {
+          "prelead": "1=0",
+          "lead": "1=1"
+        },
+        "select_list": "qtd FROM apolo_cte; DROP TABLE x",
+        "group_by": "",
+        "order_by": "",
+        "top": 500
+      },
+      "tokens_input": 150,
+      "tokens_output": 25
+    }
+  ],
+  "sql_result": [],
+  "sql_raise": null,
+  "eventos_esperados": [
+    {
+      "type": "status",
+      "text": "Entendendo sua pergunta..."
+    },
+    {
+      "type": "classification",
+      "dominio": "CRM_PIPELINE",
+      "confidence": 0.9
+    },
+    {
+      "type": "status",
+      "text": "Gerando consulta..."
+    },
+    {
+      "type": "token",
+      "delta": "A consulta gerada foi bloqueada por segu"
+    },
+    {
+      "type": "token",
+      "delta": "rança. Tente reformular."
+    },
+    {
+      "type": "done"
+    }
+  ]
+}

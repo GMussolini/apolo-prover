@@ -8,7 +8,6 @@ import json
 import re
 import unicodedata
 from app.domains._base import Dominio
-from app.core.sql_guard import validar_sql_readonly
 
 
 def render_lista_dominios(dominios) -> str:
@@ -99,33 +98,6 @@ def render_few_shots(d: Dominio) -> str:
             + (f"Explicação: {fs.explicacao}\n" if fs.explicacao else "")
         )
     return "\n".join(parts)
-
-
-def montar_sql_final(d: Dominio, partes: dict) -> str:
-    """
-    Recebe o JSON parseado do LLM com {wheres, select_list, group_by, order_by, top}
-    e monta o SQL T-SQL final, validando com sql_guard antes de retornar.
-    """
-    cte = d.cte_template
-    wheres = partes.get("wheres") or {}
-    for ramo in d.ramos:
-        where = wheres.get(ramo.nome) or "1=1"
-        cte = cte.replace("{" + ramo.placeholder + "}", where)
-
-    select_list = (partes.get("select_list") or "*").strip()
-    group_by = (partes.get("group_by") or "").strip()
-    order_by = (partes.get("order_by") or "").strip()
-    top = int(partes.get("top") or 500)
-
-    alias = d.cte_alias or "apolo_cte"
-    sql_final = f"WITH {alias} AS (\n{cte}\n)\nSELECT TOP {top} {select_list} FROM {alias}"
-    if group_by:
-        sql_final += f"\nGROUP BY {group_by}"
-    if order_by:
-        sql_final += f"\nORDER BY {order_by}"
-
-    validar_sql_readonly(sql_final)
-    return sql_final
 
 
 def contexto_para_classificador(dominios, pergunta: str = "") -> dict:
