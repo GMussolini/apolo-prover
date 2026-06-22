@@ -23,6 +23,13 @@ class TurnContext:
     spec_grafico: dict | None = None
     erro: str | None = None
 
+    # campos de trabalho (transientes, passados entre estágios)
+    historico_txt: str = "(sem histórico)"
+    dominio: object | None = None
+    partes: dict | None = None
+    amostra: list | None = None
+    total_linhas: int = 0
+
     def add_usage(self, ti: int, to: int, custo: float) -> None:
         self.tokens_input += ti
         self.tokens_output += to
