@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 
 from app.api._deps import usuario_atual
 from app.core.engine import processar_pergunta
-from app.core.database import get_pg_pool
+from app.core.database import hist_execute
 
 router = APIRouter(prefix="/api", tags=["chat"])
 
@@ -26,15 +26,11 @@ async def chat(body: ChatBody, request: Request, usuario: dict = Depends(usuario
     sessao_id = body.sessao_id
 
     if not sessao_id:
-        pool = get_pg_pool()
         novo_id = uuid.uuid4()
-        async with pool.connection() as conn:
-            async with conn.cursor() as cur:
-                await cur.execute(
-                    "INSERT INTO tb_sessao (id, usuario_id, canal) VALUES (%s, %s, 'texto')",
-                    (str(novo_id), usuario["id"]),
-                )
-            await conn.commit()
+        await hist_execute(
+            "INSERT INTO tb_sessao (id, usuario_id, canal) VALUES (?, ?, 'texto')",
+            (str(novo_id), usuario["id"]),
+        )
         sessao_id = str(novo_id)
 
     async def gerar():

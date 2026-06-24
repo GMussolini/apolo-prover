@@ -2,14 +2,14 @@
 
 Endpoints CRUD para `tb_sessao` + leitura de `tb_pergunta` + `tb_resposta`.
 Toda rota exige usuário autenticado (Depends(usuario_atual)) e checa ownership
-via WHERE usuario_id = %s antes de retornar/alterar.
+via WHERE usuario_id = ? antes de retornar/alterar.
 """
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
 from app.api._deps import usuario_atual
-from app.core.database import get_pg_pool
+from app.core.database import hist_fetchall, hist_fetchone, hist_acquire
 
 router = APIRouter(prefix="/api/sessoes", tags=["sessoes"])
 
@@ -51,23 +51,18 @@ class RenomearBody(BaseModel):
 @router.get("", response_model=list[SessaoItem])
 async def listar_sessoes(usuario: dict = Depends(usuario_atual)) -> list[SessaoItem]:
     """Lista as sessões do usuário logado (até 100 mais recentes, não deletadas)."""
-    pool = get_pg_pool()
-    async with pool.connection() as conn:
-        async with conn.cursor() as cur:
-            await cur.execute(
-                """
-                SELECT s.id, s.titulo, s.canal, s.created_at, s.updated_at,
-                       COALESCE(COUNT(p.id), 0) AS msg_count
-                FROM tb_sessao s
-                LEFT JOIN tb_pergunta p ON p.sessao_id = s.id
-                WHERE s.usuario_id = %s AND s.is_deleted = FALSE
-                GROUP BY s.id, s.titulo, s.canal, s.created_at, s.updated_at
-                ORDER BY s.updated_at DESC
-                LIMIT 100
-                """,
-                (usuario["id"],),
-            )
-            rows = await cur.fetchall()
+    rows = await hist_fetchall(
+        """
+        SELECT TOP 100 s.id, s.titulo, s.canal, s.created_at, s.updated_at,
+               COALESCE(COUNT(p.id), 0) AS msg_count
+        FROM tb_sessao s
+        LEFT JOIN tb_pergunta p ON p.sessao_id = s.id
+        WHERE s.usuario_id = ? AND s.is_deleted = 0
+        GROUP BY s.id, s.titulo, s.canal, s.created_at, s.updated_at
+        ORDER BY s.updated_at DESC
+        """,
+        (usuario["id"],),
+    )
     return [
         SessaoItem(
             id=str(r[0]),
@@ -87,30 +82,26 @@ async def listar_mensagens(
     usuario: dict = Depends(usuario_atual),
 ) -> list[MensagemItem]:
     """Lista mensagens (pergunta + resposta) da sessão. Valida ownership."""
-    pool = get_pg_pool()
-    async with pool.connection() as conn:
-        async with conn.cursor() as cur:
-            # Checa ownership antes de devolver qualquer dado.
-            await cur.execute(
-                "SELECT 1 FROM tb_sessao WHERE id = %s AND usuario_id = %s AND is_deleted = FALSE",
-                (str(sessao_id), usuario["id"]),
-            )
-            if not await cur.fetchone():
-                raise HTTPException(status.HTTP_404_NOT_FOUND, "sessão não encontrada")
+    # Checa ownership antes de devolver qualquer dado.
+    owns = await hist_fetchone(
+        "SELECT 1 FROM tb_sessao WHERE id = ? AND usuario_id = ? AND is_deleted = 0",
+        (str(sessao_id), usuario["id"]),
+    )
+    if not owns:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "sessão não encontrada")
 
-            await cur.execute(
-                """
-                SELECT p.id, p.pergunta, p.dominio, p.confidence_classificacao,
-                       p.origem, p.created_at,
-                       r.resposta_texto, r.sql_gerado, r.grafico_sugerido, r.spec_grafico
-                FROM tb_pergunta p
-                LEFT JOIN tb_resposta r ON r.pergunta_id = p.id
-                WHERE p.sessao_id = %s
-                ORDER BY p.created_at ASC
-                """,
-                (str(sessao_id),),
-            )
-            rows = await cur.fetchall()
+    rows = await hist_fetchall(
+        """
+        SELECT p.id, p.pergunta, p.dominio, p.confidence_classificacao,
+               p.origem, p.created_at,
+               r.resposta_texto, r.sql_gerado, r.grafico_sugerido, r.spec_grafico
+        FROM tb_pergunta p
+        LEFT JOIN tb_resposta r ON r.pergunta_id = p.id
+        WHERE p.sessao_id = ?
+        ORDER BY p.created_at ASC
+        """,
+        (str(sessao_id),),
+    )
     return [
         MensagemItem(
             id=str(r[0]),
@@ -135,21 +126,18 @@ async def renomear_sessao(
     usuario: dict = Depends(usuario_atual),
 ) -> dict:
     """Renomeia título da sessão. Valida ownership no próprio UPDATE."""
-    pool = get_pg_pool()
-    async with pool.connection() as conn:
-        async with conn.cursor() as cur:
-            await cur.execute(
-                """
-                UPDATE tb_sessao
-                SET titulo = %s
-                WHERE id = %s AND usuario_id = %s AND is_deleted = FALSE
-                """,
-                (body.titulo, str(sessao_id), usuario["id"]),
-            )
-            if cur.rowcount == 0:
-                await conn.rollback()
-                raise HTTPException(status.HTTP_404_NOT_FOUND, "sessão não encontrada")
-            await conn.commit()
+    async with hist_acquire() as conn:
+        cur = await conn.cursor()
+        await cur.execute(
+            """
+            UPDATE tb_sessao
+            SET titulo = ?
+            WHERE id = ? AND usuario_id = ? AND is_deleted = 0
+            """,
+            (body.titulo, str(sessao_id), usuario["id"]),
+        )
+        if cur.rowcount == 0:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "sessão não encontrada")
     return {"id": str(sessao_id), "titulo": body.titulo}
 
 
@@ -158,24 +146,21 @@ async def deletar_sessao(
     sessao_id: UUID,
     usuario: dict = Depends(usuario_atual),
 ) -> dict:
-    """Soft delete da sessão (is_deleted = TRUE). Valida ownership no UPDATE."""
-    pool = get_pg_pool()
-    async with pool.connection() as conn:
-        async with conn.cursor() as cur:
-            await cur.execute(
-                """
-                UPDATE tb_sessao
-                SET is_deleted = TRUE
-                WHERE id = %s AND usuario_id = %s AND is_deleted = FALSE
-                """,
-                (str(sessao_id), usuario["id"]),
-            )
-            if cur.rowcount == 0:
-                await conn.rollback()
-                raise HTTPException(status.HTTP_404_NOT_FOUND, "sessão não encontrada")
-            await cur.execute(
-                "INSERT INTO tb_audit (usuario_id, acao, recurso) VALUES (%s, %s, %s)",
-                (usuario["id"], "sessao.delete", str(sessao_id)),
-            )
-            await conn.commit()
+    """Soft delete da sessão (is_deleted = 1). Valida ownership no UPDATE."""
+    async with hist_acquire() as conn:
+        cur = await conn.cursor()
+        await cur.execute(
+            """
+            UPDATE tb_sessao
+            SET is_deleted = 1
+            WHERE id = ? AND usuario_id = ? AND is_deleted = 0
+            """,
+            (str(sessao_id), usuario["id"]),
+        )
+        if cur.rowcount == 0:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "sessão não encontrada")
+        await cur.execute(
+            "INSERT INTO tb_audit (usuario_id, acao, recurso) VALUES (?, ?, ?)",
+            (usuario["id"], "sessao.delete", str(sessao_id)),
+        )
     return {"id": str(sessao_id), "deleted": True}

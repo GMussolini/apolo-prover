@@ -1,6 +1,6 @@
 import time
 from fastapi import APIRouter
-from app.core.database import get_pool, get_pg_pool
+from app.core.database import get_pool, hist_fetchone
 
 router = APIRouter(tags=["health"])
 
@@ -22,13 +22,9 @@ async def health():
             status["status"] = "degraded"
     try:
         start = time.perf_counter()
-        pool = get_pg_pool()
-        async with pool.connection() as conn:
-            async with conn.cursor() as cur:
-                await cur.execute("SELECT 1")
-                await cur.fetchone()
-        status["postgres"] = {"ok": True, "latencia_ms": int((time.perf_counter() - start) * 1000)}
+        await hist_fetchone("SELECT 1")
+        status["historico"] = {"ok": True, "latencia_ms": int((time.perf_counter() - start) * 1000)}
     except Exception as e:
-        status["postgres"] = {"ok": False, "erro": str(e)[:200]}
+        status["historico"] = {"ok": False, "erro": str(e)[:200]}
         status["status"] = "down"
     return status

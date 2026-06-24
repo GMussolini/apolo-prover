@@ -35,24 +35,31 @@ class _FakeCur:
     async def __aenter__(self): return self
     async def __aexit__(self, *a): return False
 
+
 class _FakeConn:
     def __init__(self, cur): self._cur = cur
-    def cursor(self): return self._cur
-    async def commit(self): pass
+    async def cursor(self): return self._cur
     async def __aenter__(self): return self
     async def __aexit__(self, *a): return False
 
-class _FakePool:
-    def __init__(self, conn): self._conn = conn
-    def connection(self): return self._conn
+
+from contextlib import asynccontextmanager
 
 
-def test_pg_turn_store_save(monkeypatch):
-    cur = _FakeCur(); pool = _FakePool(_FakeConn(cur))
+def test_historico_turn_store_save(monkeypatch):
+    cur = _FakeCur()
+
+    @asynccontextmanager
+    async def fake_hist_acquire():
+        yield _FakeConn(cur)
+
+    from app.core import database
     from app.ports import turn_store
-    monkeypatch.setattr(turn_store, "get_pg_pool", lambda: pool)
-    from app.ports.turn_store import PgTurnStore
-    asyncio.run(PgTurnStore().save_turn(
+    monkeypatch.setattr(database, "hist_acquire", fake_hist_acquire)
+    monkeypatch.setattr(turn_store, "hist_acquire", fake_hist_acquire)
+
+    from app.ports.turn_store import HistoricoTurnStore
+    asyncio.run(HistoricoTurnStore().save_turn(
         sessao_id="s1", usuario_id=1, pergunta="p", pergunta_reformulada="p",
         dominio_nome="D", base_conexao="crm", confidence=0.9, canal="texto",
         resposta_texto="r", sql_gerado="SELECT 1", dados_retornados=[{"a":1}],

@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from app.api._deps import usuario_atual
 from app.core.engine import processar_pergunta
 from app.core.rate_limiter import consumir_voz_minutos
-from app.core.database import get_pg_pool
+from app.core.database import hist_execute, hist_fetchone, hist_acquire
 from app.services.realtime_service import criar_ephemeral_session
 
 router = APIRouter(prefix="/api/voice", tags=["voice"])
@@ -16,19 +16,17 @@ async def session(usuario: dict = Depends(usuario_atual)):
         data = await criar_ephemeral_session()
     except Exception as e:
         raise HTTPException(status.HTTP_502_BAD_GATEWAY, f"realtime indisponível: {e}")
-    pool = get_pg_pool()
     sess_uuid = uuid.uuid4()
-    async with pool.connection() as conn:
-        async with conn.cursor() as cur:
-            await cur.execute(
-                "INSERT INTO tb_sessao (id, usuario_id, canal) VALUES (%s, %s, 'voz')",
-                (str(sess_uuid), usuario["id"]),
-            )
-            await cur.execute(
-                "INSERT INTO tb_audit (usuario_id, acao, payload) VALUES (%s, %s, %s::jsonb)",
-                (usuario["id"], "voice.session.start", json.dumps({"session_id": data["session_id"]})),
-            )
-        await conn.commit()
+    async with hist_acquire() as conn:
+        cur = await conn.cursor()
+        await cur.execute(
+            "INSERT INTO tb_sessao (id, usuario_id, canal) VALUES (?, ?, 'voz')",
+            (str(sess_uuid), usuario["id"]),
+        )
+        await cur.execute(
+            "INSERT INTO tb_audit (usuario_id, acao, payload) VALUES (?, ?, ?)",
+            (usuario["id"], "voice.session.start", json.dumps({"session_id": data["session_id"]})),
+        )
     return {**data, "sessao_apolo_id": str(sess_uuid)}
 
 class ToolCallBody(BaseModel):
@@ -38,15 +36,12 @@ class ToolCallBody(BaseModel):
 
 @router.post("/tool-call")
 async def tool_call(body: ToolCallBody, usuario: dict = Depends(usuario_atual)):
-    pool = get_pg_pool()
-    async with pool.connection() as conn:
-        async with conn.cursor() as cur:
-            await cur.execute(
-                "SELECT 1 FROM tb_sessao WHERE id = %s AND usuario_id = %s",
-                (body.sessao_id, usuario["id"]),
-            )
-            if not await cur.fetchone():
-                raise HTTPException(status.HTTP_404_NOT_FOUND, "sessao nao encontrada")
+    row = await hist_fetchone(
+        "SELECT 1 FROM tb_sessao WHERE id = ? AND usuario_id = ?",
+        (body.sessao_id, usuario["id"]),
+    )
+    if not row:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "sessao nao encontrada")
 
     resposta_final = ""
     async for evt in processar_pergunta(usuario, body.sessao_id, body.pergunta, canal="voz"):
