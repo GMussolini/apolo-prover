@@ -1,11 +1,11 @@
-CREATE OR REPLACE FUNCTION trg_updated_at() RETURNS TRIGGER AS $$
+IF OBJECT_ID(N'trg_sessao_updated_at', N'TR') IS NOT NULL
+  DROP TRIGGER trg_sessao_updated_at;
+GO
+CREATE TRIGGER trg_sessao_updated_at ON tb_sessao
+AFTER UPDATE AS
 BEGIN
-  NEW.updated_at = NOW();
-  RETURN NEW;
+  SET NOCOUNT ON;
+  UPDATE s SET updated_at = SYSUTCDATETIME()
+  FROM tb_sessao s INNER JOIN inserted i ON s.id = i.id;
 END;
-$$ LANGUAGE plpgsql;
-
-DROP TRIGGER IF EXISTS trg_sessao_updated_at ON tb_sessao;
-CREATE TRIGGER trg_sessao_updated_at
-  BEFORE UPDATE ON tb_sessao
-  FOR EACH ROW EXECUTE FUNCTION trg_updated_at();
+GO

@@ -31,7 +31,7 @@ class Config(BaseModel):
 
     crm_conn: str
     cr_conn: str
-    postgres_conn: str
+    historico_conn: str
 
     cors_origins: list[str] = ["http://localhost:3000"]
 

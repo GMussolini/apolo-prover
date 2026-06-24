@@ -1,42 +1,51 @@
-CREATE TABLE IF NOT EXISTS tb_sessao (
-  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+IF OBJECT_ID(N'tb_sessao', N'U') IS NULL
+CREATE TABLE tb_sessao (
+  id          UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
   usuario_id  INT NOT NULL REFERENCES tb_usuario(id),
-  titulo      VARCHAR(200),
-  canal       VARCHAR(10) NOT NULL DEFAULT 'texto',
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  is_deleted  BOOLEAN NOT NULL DEFAULT FALSE
+  titulo      NVARCHAR(200) NULL,
+  canal       NVARCHAR(10) NOT NULL DEFAULT 'texto',
+  created_at  DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+  updated_at  DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+  is_deleted  BIT NOT NULL DEFAULT 0
 );
-
-CREATE TABLE IF NOT EXISTS tb_pergunta (
-  id                       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  sessao_id                UUID NOT NULL REFERENCES tb_sessao(id) ON DELETE CASCADE,
+GO
+IF OBJECT_ID(N'tb_pergunta', N'U') IS NULL
+CREATE TABLE tb_pergunta (
+  id                       UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+  sessao_id                UNIQUEIDENTIFIER NOT NULL REFERENCES tb_sessao(id) ON DELETE CASCADE,
   usuario_id               INT NOT NULL REFERENCES tb_usuario(id),
-  pergunta                 TEXT NOT NULL,
-  pergunta_reformulada     TEXT,
-  dominio                  VARCHAR(100),
-  base_conexao             VARCHAR(20),
-  confidence_classificacao DECIMAL(3,2),
-  origem                   VARCHAR(20) NOT NULL DEFAULT 'texto',
-  created_at               TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  pergunta                 NVARCHAR(MAX) NOT NULL,
+  pergunta_reformulada     NVARCHAR(MAX) NULL,
+  dominio                  NVARCHAR(100) NULL,
+  base_conexao             NVARCHAR(20) NULL,
+  confidence_classificacao DECIMAL(3,2) NULL,
+  origem                   NVARCHAR(20) NOT NULL DEFAULT 'texto',
+  created_at               DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
 );
-
-CREATE TABLE IF NOT EXISTS tb_resposta (
-  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  pergunta_id       UUID NOT NULL REFERENCES tb_pergunta(id) ON DELETE CASCADE,
-  resposta_texto    TEXT,
-  sql_gerado        TEXT,
-  dados_retornados  JSONB,
-  grafico_sugerido  VARCHAR(20),
-  spec_grafico      JSONB,
-  tokens_input      INT,
-  tokens_output     INT,
-  custo_estimado    DECIMAL(10,6),
-  latencia_ms       INT,
-  erro              TEXT,
-  created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
+GO
+IF OBJECT_ID(N'tb_resposta', N'U') IS NULL
+CREATE TABLE tb_resposta (
+  id                UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+  pergunta_id       UNIQUEIDENTIFIER NOT NULL REFERENCES tb_pergunta(id) ON DELETE CASCADE,
+  resposta_texto    NVARCHAR(MAX) NULL,
+  sql_gerado        NVARCHAR(MAX) NULL,
+  dados_retornados  NVARCHAR(MAX) NULL,
+  grafico_sugerido  NVARCHAR(20) NULL,
+  spec_grafico      NVARCHAR(MAX) NULL,
+  tokens_input      INT NULL,
+  tokens_output     INT NULL,
+  custo_estimado    DECIMAL(10,6) NULL,
+  latencia_ms       INT NULL,
+  erro              NVARCHAR(MAX) NULL,
+  created_at        DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
 );
-
-CREATE INDEX IF NOT EXISTS idx_pergunta_sessao ON tb_pergunta (sessao_id, created_at);
-CREATE INDEX IF NOT EXISTS idx_sessao_usuario ON tb_sessao (usuario_id, updated_at DESC) WHERE is_deleted = FALSE;
-CREATE INDEX IF NOT EXISTS idx_resposta_pergunta ON tb_resposta (pergunta_id);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_pergunta_sessao')
+CREATE INDEX idx_pergunta_sessao ON tb_pergunta (sessao_id, created_at);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_sessao_usuario')
+CREATE INDEX idx_sessao_usuario ON tb_sessao (usuario_id, updated_at DESC) WHERE is_deleted = 0;
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_resposta_pergunta')
+CREATE INDEX idx_resposta_pergunta ON tb_resposta (pergunta_id);
+GO
