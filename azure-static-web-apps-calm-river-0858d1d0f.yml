@@ -25,8 +25,8 @@ jobs:
       azure_static_web_apps_api_token: $(AZURE_STATIC_WEB_APPS_API_TOKEN_CALM_RIVER_0858D1D0F)
 ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
 # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-      app_location: "/apps/web/app" # App source code path
-      api_location: "" # Api source code path - optional
-      output_location: "" # Built app content directory - optional
+      app_location: "apps/web" # onde esta o package.json (Oryx roda npm install + npm run build)
+      api_location: "" # sem API gerenciada (o backend e um Web App separado)
+      output_location: "out" # saida do 'next build' com output:'export'
 ###### End of Repository/Build Configurations ######
 
