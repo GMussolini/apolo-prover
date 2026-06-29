@@ -1,0 +1,72 @@
+# =====================================================================
+# Pipeline do BACKEND do APOLO (Azure DevOps) -> Azure App Service (Python, Linux)
+# SEM Docker: o Oryx instala as deps (pip) e o startup.sh sobe o uvicorn + driver ODBC.
+#
+# Pre-requisitos que o Dile cria no Azure / DevOps:
+#   - Web App (App Service Linux, runtime Python 3.12) chamado 'apolo-prover-backend'
+#   - Service connection ARM (ex.: 'sc-azure-prover') em Project Settings > Service connections
+#   - No Web App, App Settings:
+#       SCM_DO_BUILD_DURING_DEPLOYMENT = true
+#       APOLO_CONFIG_JSON              = <json de config, do Key Vault>
+#       (Startup Command pode vir daqui pela task OU setado manualmente: bash startup.sh)
+# =====================================================================
+
+trigger:
+  branches:
+    include: [ main ]
+  paths:
+    include: [ apps/api/* ]   # so dispara quando o backend muda
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  azureServiceConnection: 'sc-azure-prover'   # <-- ajustar pro nome da service connection
+  webAppName: 'apolo-prover-backend'          # <-- ajustar pro nome do Web App
+  workingDir: 'apps/api'
+  pythonVersion: '3.12'
+
+stages:
+- stage: Test
+  displayName: Gate de testes
+  jobs:
+  - job: pytest
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(pythonVersion)'
+    - script: |
+        cd $(workingDir)
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+      displayName: pip install
+    - script: |
+        cd $(workingDir)
+        python -m pytest tests/test_catalog_consistency.py tests/test_characterization.py -q
+      displayName: 'Gate: catalogo + caracterizacao'
+      # Esses testes nao tocam banco (usam fakes/dumps) -> nao precisam do driver ODBC.
+
+- stage: Deploy
+  displayName: Deploy no App Service
+  dependsOn: Test
+  condition: succeeded()
+  jobs:
+  - job: deploy
+    steps:
+    - task: ArchiveFiles@2
+      displayName: Empacota apps/api
+      inputs:
+        rootFolderOrFile: '$(workingDir)'
+        includeRootFolder: false
+        archiveType: zip
+        archiveFile: '$(Build.ArtifactStagingDirectory)/backend.zip'
+        replaceExistingArchive: true
+    - task: AzureWebApp@1
+      displayName: Deploy Web App (Python)
+      inputs:
+        azureSubscription: '$(azureServiceConnection)'
+        appType: webAppLinux
+        appName: '$(webAppName)'
+        runtimeStack: 'PYTHON|3.12'
+        package: '$(Build.ArtifactStagingDirectory)/backend.zip'
+        startUpCommand: 'bash startup.sh'
